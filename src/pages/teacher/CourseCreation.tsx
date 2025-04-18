@@ -36,6 +36,21 @@ const CourseCreation = () => {
 
   const handleLectureChange = (index: number, field: keyof LectureInput, value: string | number) => {
     const updatedLectures = [...lectures];
+    
+    // If the field is videoUrl, convert YouTube URLs to embed format
+    if (field === 'videoUrl' && typeof value === 'string') {
+      let embedUrl = value;
+      if (value.includes('youtube.com/watch?v=')) {
+        const videoId = value.split('v=')[1].split('&')[0];
+        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        value = embedUrl;
+      } else if (value.includes('youtu.be/')) {
+        const videoId = value.split('youtu.be/')[1];
+        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        value = embedUrl;
+      }
+    }
+    
     updatedLectures[index] = {
       ...updatedLectures[index],
       [field]: value

@@ -17,6 +17,7 @@ import CourseCreation from "./pages/teacher/CourseCreation";
 import AssignmentCreation from "./pages/teacher/AssignmentCreation";
 import TestCreation from "./pages/teacher/TestCreation";
 import { AuthProvider } from "./contexts/AuthContext";
+import TeacherCourseView from "./pages/teacher/TeacherCourseView";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/register" element={<Register />} />
               <Route path="/student/dashboard" element={<StudentDashboard />} />
               <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+              <Route path="/teacher/course/:id" element={<TeacherCourseView />} />
               <Route path="/course/:id" element={<CourseView />} />
               <Route path="/assignment/:id" element={<AssignmentView />} />
               <Route path="/mock-test/:id" element={<MockTest />} />

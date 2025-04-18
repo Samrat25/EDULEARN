@@ -1,11 +1,12 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageLayout } from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle } from 'lucide-react';
 import { Course, Lecture } from '@/types/course';
 import { Assignment } from '@/types/assignment';
 import { Test } from '@/types/test';
@@ -21,6 +22,9 @@ const CourseView = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
   const [currentLecture, setCurrentLecture] = useState<Lecture | null>(null);
+  const [watchedVideos, setWatchedVideos] = useState<string[]>([]);
+  const [progressPercent, setProgressPercent] = useState(0);
+  const videoRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     if (id) {
@@ -37,6 +41,19 @@ const CourseView = () => {
       
       const courseTests = getTestsByCourseId(id);
       setTests(courseTests);
+      
+      // Load watched videos from local storage
+      const savedWatchedVideos = localStorage.getItem(`watchedVideos-${id}`);
+      if (savedWatchedVideos) {
+        const parsed = JSON.parse(savedWatchedVideos);
+        setWatchedVideos(parsed);
+        
+        // Calculate progress percentage
+        if (courseData && courseData.lectures.length > 0) {
+          const progress = (parsed.length / courseData.lectures.length) * 100;
+          setProgressPercent(progress);
+        }
+      }
     }
   }, [id]);
 
@@ -73,11 +90,25 @@ const CourseView = () => {
               <div className="relative aspect-video w-full overflow-hidden">
                 {currentLecture?.videoUrl ? (
                   <iframe
+                    ref={videoRef}
                     src={currentLecture.videoUrl}
                     title={currentLecture.title}
                     className="absolute h-full w-full"
                     frameBorder="0"
                     allowFullScreen
+                    onEnded={() => {
+                      if (currentLecture && !watchedVideos.includes(currentLecture.id)) {
+                        const updatedWatched = [...watchedVideos, currentLecture.id];
+                        setWatchedVideos(updatedWatched);
+                        localStorage.setItem(`watchedVideos-${id}`, JSON.stringify(updatedWatched));
+                        
+                        // Update progress percentage
+                        if (course && course.lectures.length > 0) {
+                          const progress = (updatedWatched.length / course.lectures.length) * 100;
+                          setProgressPercent(progress);
+                        }
+                      }
+                    }}
                   ></iframe>
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -106,20 +137,25 @@ const CourseView = () => {
               <TabsContent value="lectures" className="mt-6">
                 <div className="space-y-4">
                   {course.lectures.length > 0 ? (
-                    course.lectures
-                      .sort((a, b) => a.order - b.order)
-                      .map((lecture) => (
-                        <Card 
-                          key={lecture.id} 
-                          className={`cursor-pointer hover:bg-secondary/50 ${currentLecture?.id === lecture.id ? 'border-primary' : ''}`}
-                          onClick={() => setCurrentLecture(lecture)}
-                        >
-                          <CardHeader className="p-4">
+                    course.lectures.map((lecture) => (
+                      <Card 
+                        key={lecture.id} 
+                        className={`cursor-pointer hover:bg-secondary/50 ${currentLecture?.id === lecture.id ? 'border-primary' : ''}`}
+                        onClick={() => setCurrentLecture(lecture)}
+                      >
+                        <CardHeader className="p-4 flex flex-row items-center justify-between">
+                          <div>
                             <CardTitle className="text-lg">{lecture.title}</CardTitle>
-                            <CardDescription>{lecture.duration} minutes</CardDescription>
-                          </CardHeader>
-                        </Card>
-                      ))
+                            <CardDescription>
+                              {lecture.duration} minutes
+                            </CardDescription>
+                          </div>
+                          {watchedVideos.includes(lecture.id) && (
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          )}
+                        </CardHeader>
+                      </Card>
+                    ))
                   ) : (
                     <div className="text-center p-6">
                       <p>No lectures available for this course yet.</p>
@@ -188,10 +224,37 @@ const CourseView = () => {
                 </div>
                 <div>
                   <h3 className="font-medium">Progress</h3>
-                  <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-secondary">
-                    <div className="h-full w-[10%] bg-primary"></div>
+                  <div className="mt-2 flex justify-center">
+                    <div className="relative h-20 w-20">
+                      <svg className="h-full w-full" viewBox="0 0 100 100">
+                        {/* Background circle */}
+                        <circle
+                          className="fill-none stroke-secondary"
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          strokeWidth="10"
+                        />
+                        {/* Progress circle */}
+                        <circle
+                          className="fill-none stroke-primary"
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          strokeWidth="10"
+                          strokeDasharray="251.2"
+                          strokeDashoffset={251.2 - (251.2 * progressPercent / 100)}
+                          transform="rotate(-90 50 50)"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-sm font-medium">{Math.round(progressPercent)}%</span>
+                      </div>
+                    </div>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">10% complete</p>
+                  <p className="mt-2 text-center text-xs text-muted-foreground">
+                    {watchedVideos.length}/{course.lectures.length} videos completed
+                  </p>
                 </div>
                 <div>
                   <h3 className="font-medium">Course Content</h3>
