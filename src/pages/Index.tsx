@@ -19,15 +19,15 @@ const Index = () => {
   return (
     <PageLayout>
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-purple-50 to-white py-16 md:py-24">
+      <section className="bg-gradient-to-b from-purple to-black py-16 md:py-24">
         <div className="container px-4 md:px-6">
           <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl text-grey">
                   Learn, Connect, Thrive
                 </h1>
-                <p className="max-w-[600px] text-gray-500 md:text-xl">
+                <p className="max-w-[600px] text-white-500 md:text-xl">
                   Our platform connects students with teachers for a personalized learning experience.
                   Enroll in courses, complete assignments, and test your knowledge.
                 </p>
@@ -148,7 +148,7 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="bg-gray-50 py-12 md:py-16">
+      <section className="bg-purple py-12 md:py-16">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
