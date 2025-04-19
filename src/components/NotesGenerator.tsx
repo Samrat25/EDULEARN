@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { searchWikipedia, getArticleContent, type WikipediaArticle, type WikipediaSearchResult } from "../services/Wikipedia";
+import { searchWikipedia, getArticleContent, type WikipediaArticle, type WikipediaSearchResult } from "../services/wikipedia";
 import { Search, Download, BookOpen } from "lucide-react";
 import LoadingButton from "./LoadingButton";
 import * as htmlToImage from "html-to-image";

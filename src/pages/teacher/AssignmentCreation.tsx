@@ -1,6 +1,5 @@
-
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageLayout } from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,12 @@ import { Course } from '@/types/course';
 const AssignmentCreation = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  // Get courseId from query parameters
+  const searchParams = new URLSearchParams(location.search);
+  const courseIdParam = searchParams.get('courseId');
   
   const [courses, setCourses] = useState<Course[]>([]);
   const [title, setTitle] = useState('');
@@ -37,24 +41,27 @@ const AssignmentCreation = () => {
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get courseId from query parameters
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const courseIdParam = searchParams.get('courseId');
-  
   useEffect(() => {
     if (!currentUser) return;
     
+    console.log('Loading courses for teacher:', currentUser.id);
+    console.log('URL courseId parameter:', courseIdParam);
+    
     const teacherCourses = getCoursesByTeacherId(currentUser.id);
+    console.log('Available teacher courses:', teacherCourses);
     setCourses(teacherCourses);
     
     // If courseId is provided in URL, use it
     if (courseIdParam && teacherCourses.some(course => course.id === courseIdParam)) {
+      console.log('Setting courseId from URL parameter:', courseIdParam);
       setCourseId(courseIdParam);
     } else if (teacherCourses.length > 0) {
+      console.log('Setting default courseId:', teacherCourses[0].id);
       setCourseId(teacherCourses[0].id);
+    } else {
+      console.warn('No courses available for this teacher');
     }
-  }, [currentUser]);
+  }, [currentUser, courseIdParam]);
 
   const handleQuestionChange = (index: number, field: keyof Omit<AssignmentQuestion, 'id'>, value: string | number | string[]) => {
     const updatedQuestions = [...questions];
@@ -88,6 +95,47 @@ const AssignmentCreation = () => {
         [field]: field === 'points' ? Number(value) : value
       };
     }
+    setQuestions(updatedQuestions);
+  };
+
+  const addOption = (questionIndex: number) => {
+    const updatedQuestions = [...questions];
+    const currentOptions = updatedQuestions[questionIndex].options || [];
+    updatedQuestions[questionIndex] = {
+      ...updatedQuestions[questionIndex],
+      options: [...currentOptions, '']
+    };
+    setQuestions(updatedQuestions);
+  };
+
+  const removeOption = (questionIndex: number, optionIndex: number) => {
+    const currentOptions = questions[questionIndex].options || [];
+    if (currentOptions.length <= 2) {
+      toast({
+        title: 'Cannot remove option',
+        description: 'A multiple choice question must have at least 2 options.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    const updatedQuestions = [...questions];
+    const updatedOptions = currentOptions.filter((_, i) => i !== optionIndex);
+    
+    // If the removed option was the correct answer, reset correct answer
+    if (updatedQuestions[questionIndex].correctAnswer === currentOptions[optionIndex]) {
+      updatedQuestions[questionIndex] = {
+        ...updatedQuestions[questionIndex],
+        options: updatedOptions,
+        correctAnswer: ''
+      };
+    } else {
+      updatedQuestions[questionIndex] = {
+        ...updatedQuestions[questionIndex],
+        options: updatedOptions
+      };
+    }
+    
     setQuestions(updatedQuestions);
   };
 
@@ -144,13 +192,13 @@ const AssignmentCreation = () => {
     
     // Validate MCQ options and correct answers
     const invalidMCQQuestions = questions.some(q => 
-      !q.options || q.options.some(opt => !opt) || !q.correctAnswer
+      q.questionType === 'mcq' && (!q.options || q.options.some(opt => !opt) || !q.correctAnswer)
     );
     
     if (invalidMCQQuestions) {
       toast({
         title: 'Validation error',
-        description: 'Please fill in all options and select the correct answer for each question.',
+        description: 'Please fill in all options and select the correct answer for each MCQ question. This is required for auto-checking student submissions.',
         variant: 'destructive',
       });
       return;
@@ -170,7 +218,8 @@ const AssignmentCreation = () => {
         description,
         courseId,
         dueDate: new Date(dueDate).getTime(),
-        questions: questionsWithIds
+        questions: questionsWithIds,
+        autoCheck: true // Enable auto-checking for student submissions
       };
       
       const createdAssignment = createAssignment(assignmentData);
@@ -198,6 +247,7 @@ const AssignmentCreation = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Create New Assignment</h1>
           <p className="text-muted-foreground">Create an assignment for your students</p>
+          
         </div>
         
         <form onSubmit={handleSubmit}>
@@ -303,7 +353,6 @@ const AssignmentCreation = () => {
                         <div className="flex items-center">
                           <span className="font-medium text-primary">Multiple Choice Questions</span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">All questions must be multiple choice</p>
                       </div>
                       <input 
                         type="hidden" 
@@ -325,31 +374,54 @@ const AssignmentCreation = () => {
                     </div>
                     <div className="space-y-4 mt-4 p-3 border rounded-md bg-secondary/20">
                       <div className="space-y-2">
-                        <Label>Multiple Choice Options</Label>
-                        {question.options?.map((option, optionIndex) => (
-                          <div key={optionIndex} className="flex items-center gap-2 mb-2">
-                            <RadioGroupItem 
-                              value={option} 
-                              id={`option-${index}-${optionIndex}`}
-                              checked={question.correctAnswer === option}
-                              onClick={() => {
-                                if (option) {
-                                  handleQuestionChange(index, 'correctAnswer', option);
-                                }
-                              }}
-                            />
-                            <Input
-                              placeholder={`Option ${optionIndex + 1}`}
-                              value={option}
-                              onChange={(e) => {
-                                const newOptions = [...(question.options || [])];
-                                newOptions[optionIndex] = e.target.value;
-                                handleQuestionChange(index, 'options', newOptions.join('||'));
-                              }}
-                              className="flex-1"
-                            />
-                          </div>
-                        ))}
+                        <div className="flex justify-between items-center">
+                          <Label>Multiple Choice Options</Label>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => addOption(index)}
+                          >
+                            Add Option
+                          </Button>
+                        </div>
+                        <RadioGroup value={question.correctAnswer}>
+                          {question.options?.map((option, optionIndex) => (
+                            <div key={optionIndex} className="flex items-center gap-2 mb-2">
+                              <RadioGroupItem 
+                                value={option} 
+                                id={`option-${index}-${optionIndex}`}
+                                checked={question.correctAnswer === option}
+                                onClick={() => {
+                                  if (option) {
+                                    handleQuestionChange(index, 'correctAnswer', option);
+                                  }
+                                }}
+                              />
+                              <div className="flex flex-1 items-center gap-2">
+                                <Input
+                                  placeholder={`Option ${optionIndex + 1}`}
+                                  value={option}
+                                  onChange={(e) => {
+                                    const newOptions = [...(question.options || [])];
+                                    newOptions[optionIndex] = e.target.value;
+                                    handleQuestionChange(index, 'options', newOptions.join('||'));
+                                  }}
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeOption(index, optionIndex)}
+                                  disabled={(question.options?.length || 0) <= 2}
+                                >
+                                  ✕
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </RadioGroup>
                         <p className="text-xs text-muted-foreground mt-2">
                           Select the radio button next to the correct option.
                         </p>
@@ -390,4 +462,4 @@ const AssignmentCreation = () => {
   );
 };
 
-export default AssignmentCreation;
+export default AssignmentCreation; 

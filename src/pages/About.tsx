@@ -30,7 +30,7 @@ const About = () => {
                 available to all, regardless of geographical or socioeconomic barriers.
               </p>
               <p className="text-muted-foreground">
-                Founded in 2023, our platform bridges the gap between passionate educators and 
+                Founded in 2025, our platform bridges the gap between passionate educators and 
                 eager learners, creating a vibrant community where knowledge flows freely and 
                 learning becomes a collaborative journey.
               </p>
@@ -112,7 +112,7 @@ const About = () => {
                   <div className="mx-auto bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center mb-4">
                     <span className="text-2xl font-bold text-primary">JS</span>
                   </div>
-                  <CardTitle>John Smith</CardTitle>
+                  <CardTitle>Samrat Natta</CardTitle>
                   <CardDescription>Founder & CEO</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center text-sm text-muted-foreground">
@@ -124,7 +124,7 @@ const About = () => {
                   <div className="mx-auto bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center mb-4">
                     <span className="text-2xl font-bold text-primary">AP</span>
                   </div>
-                  <CardTitle>Amanda Patel</CardTitle>
+                  <CardTitle>Soumadeep Dey</CardTitle>
                   <CardDescription>Head of Education</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center text-sm text-muted-foreground">
@@ -136,7 +136,7 @@ const About = () => {
                   <div className="mx-auto bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center mb-4">
                     <span className="text-2xl font-bold text-primary">MR</span>
                   </div>
-                  <CardTitle>Marcus Rodriguez</CardTitle>
+                  <CardTitle>Maniratna Roy</CardTitle>
                   <CardDescription>CTO</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center text-sm text-muted-foreground">
@@ -164,11 +164,11 @@ const About = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <Phone className="h-5 w-5 text-primary" />
-                    <span>+1 (555) 123-4567</span>
+                    <span>+91 9876543210</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <MapPin className="h-5 w-5 text-primary" />
-                    <span>123 Education Avenue, Learning City, 10001</span>
+                    <span>Netaji Subhash Engineering College, Kolkata</span>
                   </div>
                   
                   <Separator className="my-4" />
