@@ -57,8 +57,6 @@ Backend:
 
 🌿 Express.js
 
-🍃 MongoDB
-
 Authentication & Database:
 
 🔥 Firebase (for auth and storage)
