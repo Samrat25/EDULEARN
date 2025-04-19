@@ -2,15 +2,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
-import { NotesGenerator } from './NotesGenerator';
-import { MindMapGenerator } from './MindMapGenerator';
+import NotesGenerator from './NotesGenerator';
+import MindMapGenerator from './MindMapGenerator';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut, BookOpen, Home, Info, Search } from 'lucide-react';
+import { User, LogOut, BookOpen, Home, Info, Search, FileText, Network } from 'lucide-react';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
 export function Navbar() {
   const { currentUser, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [showNotesGenerator, setShowNotesGenerator] = useState(false);
+  const [showMindMapGenerator, setShowMindMapGenerator] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -56,9 +60,28 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           <ThemeToggle />
           
-          {/* Always show the generators regardless of authentication */}
-          <NotesGenerator />
-          <MindMapGenerator />
+          {/* AI Tools as Dialog Buttons */}
+          <Dialog open={showNotesGenerator} onOpenChange={setShowNotesGenerator}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon" className="rounded-full" title="Notes Generator">
+                <FileText className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <NotesGenerator />
+            </DialogContent>
+          </Dialog>
+          
+          <Dialog open={showMindMapGenerator} onOpenChange={setShowMindMapGenerator}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon" className="rounded-full" title="Knowledge Map">
+                <Network className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+              <MindMapGenerator />
+            </DialogContent>
+          </Dialog>
           
           {isAuthenticated ? (
             <div className="flex items-center gap-4">

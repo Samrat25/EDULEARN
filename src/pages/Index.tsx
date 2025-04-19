@@ -1,4 +1,3 @@
-
 import { PageLayout } from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -19,34 +18,34 @@ const Index = () => {
   return (
     <PageLayout>
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-purple to-black py-16 md:py-24">
+      <section className="bg-gradient-to-b from-primary/90 to-background py-16 md:py-24">
         <div className="container px-4 md:px-6">
           <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl text-grey">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl text-white">
                   Learn, Connect, Thrive
                 </h1>
-                <p className="max-w-[600px] text-white-500 md:text-xl">
+                <p className="max-w-[600px] text-white/90 md:text-xl">
                   Our platform connects students with teachers for a personalized learning experience.
                   Enroll in courses, complete assignments, and test your knowledge.
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
                 <Link to="/register">
-                  <Button size="lg" className="bg-primary">Get Started</Button>
+                  <Button size="lg" className="bg-white text-primary hover:bg-white/90">Get Started</Button>
                 </Link>
                 <Link to="/courses">
-                  <Button size="lg" variant="outline">Browse Courses</Button>
+                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">Browse Courses</Button>
                 </Link>
               </div>
             </div>
             <div className="flex items-center justify-center">
               <img 
-                src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=800&q=80" 
-                alt="Students learning" 
-                className="aspect-video overflow-hidden rounded-xl object-cover object-center"
-                width={600}
+                src="/Logo.png" 
+                alt="EduLearn Logo" 
+                className="aspect-auto overflow-hidden rounded-xl object-contain object-center max-h-80"
+                width={400}
                 height={400}
               />
             </div>
@@ -148,20 +147,20 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="bg-purple py-12 md:py-16">
+      <section className="bg-primary/10 py-12 md:py-16">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                 Why Choose Us
               </h2>
-              <p className="max-w-[600px] text-gray-500 md:text-xl">
+              <p className="max-w-[600px] text-muted-foreground md:text-xl">
                 Our platform offers the best learning experience for students and teachers.
               </p>
             </div>
           </div>
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
+            <div className="flex flex-col items-center space-y-2 rounded-lg border bg-card p-6 shadow-sm">
               <div className="rounded-full bg-primary/10 p-4">
                 <svg
                   className="h-6 w-6 text-primary"
@@ -181,11 +180,11 @@ const Index = () => {
                 </svg>
               </div>
               <h3 className="text-xl font-bold">Interactive Learning</h3>
-              <p className="text-center text-gray-500">
+              <p className="text-center text-muted-foreground">
                 Engage with video lectures, assignments, and interactive tests.
               </p>
             </div>
-            <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
+            <div className="flex flex-col items-center space-y-2 rounded-lg border bg-card p-6 shadow-sm">
               <div className="rounded-full bg-primary/10 p-4">
                 <svg
                   className="h-6 w-6 text-primary"
@@ -206,11 +205,11 @@ const Index = () => {
                 </svg>
               </div>
               <h3 className="text-xl font-bold">Expert Teachers</h3>
-              <p className="text-center text-gray-500">
+              <p className="text-center text-muted-foreground">
                 Learn from experienced educators in various fields.
               </p>
             </div>
-            <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
+            <div className="flex flex-col items-center space-y-2 rounded-lg border bg-card p-6 shadow-sm">
               <div className="rounded-full bg-primary/10 p-4">
                 <svg
                   className="h-6 w-6 text-primary"
@@ -228,7 +227,7 @@ const Index = () => {
                 </svg>
               </div>
               <h3 className="text-xl font-bold">Secure Platform</h3>
-              <p className="text-center text-gray-500">
+              <p className="text-center text-muted-foreground">
                 Your data is safe and secure on our platform.
               </p>
             </div>
