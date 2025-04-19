@@ -17,39 +17,89 @@ npm install
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
+🎓 EduLearn – Empowering the Future of Education 🚀
+Welcome to EduLearn, an AI-powered EdTech platform built to transform the way students learn and teachers teach. Whether you're exploring new topics or sharing your expertise, EduLearn is your smart companion for a seamless, interactive, and engaging educational experience.
 
-**Edit a file directly in GitHub**
+🌟 Key Features
+🔹 👨‍🏫 Role-Based Registration
+Register as a Student or Teacher and get access to a personalized dashboard.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+🔹 📚 Course Creation & Management
+Teachers can create structured courses, add content, and manage enrolled students with ease.
 
-**Use GitHub Codespaces**
+🔹 📝 AI-Powered Note Generator
+Turn long texts or messy notes into clean, concise, and well-organized notes in seconds.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+🔹 🧠 Smart Mind Map Generator
+Visualize complex topics with automatically generated mind maps to boost understanding and memory retention.
 
-## What technologies are used for this project?
+🔹 🔐 Secure Authentication
+Enjoy a safe learning environment with modern authentication mechanisms.
 
-This project is built with:
+🔹 📈 Progress Tracking
+Track your course progress, note completions, and learning goals over time.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+🔹 🎯 Simple & Intuitive UI
+A sleek and user-friendly interface that makes learning and teaching enjoyable.
 
-## How can I deploy this project?
+🛠 Tech Stack
+Frontend:
 
-Simply open [Lovable](https://lovable.dev/projects/fdb65a0f-87d8-444e-b640-2fc040994ff4) and click on Share -> Publish.
+⚛️ React.js
 
-## Can I connect a custom domain to my Lovable project?
+💨 Tailwind CSS
 
-Yes, you can!
+🌐 Next.js
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Backend:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+🟨 Node.js
+
+🌿 Express.js
+
+🍃 MongoDB
+
+Authentication & Database:
+
+🔥 Firebase (for auth and storage)
+
+AI & Features:
+
+🧠 OpenAI API (for generating notes and mind maps)
+
+🗺 Custom Mind Mapping Logic
+
+Others:
+
+🎥 Zego Cloud (for future integration of video calling & live classes)
+
+🔍 REST APIs for dynamic content handling
+
+🚀 Why EduLearn?
+✅ All-in-one platform for modern education
+
+🤖 Smart AI tools that save time and boost productivity
+
+🌐 Accessible anytime, anywhere
+
+📊 Designed for personalized growth and scalability
+
+💡 Future Additions
+🔔 Real-time notifications
+
+📅 Assignment and test modules
+
+🎥 Live classroom & video calling
+
+🧾 Certificate generation
+
+📱 Mobile App Support
+
+🧑‍💻 Made With ❤️ by Passionate Developers
+EduLearn was created to empower educators and learners with tools that make knowledge more accessible, visual, and impactful. Join us in shaping the future of education!
+
+Progress During Hackathon
+🛠 Hackathon Progress – EduLearn 🚀 Here’s a breakdown of what we achieved during the hackathon: ✅ Day 1 – Ideation & Setup 🧠 Finalized the core idea: a modern EdTech platform combining course creation, AI-powered notes, and mind map generation. 📝 Created wireframes and planned the user flows (student & teacher journeys). ⚙️ Initialized the project structure with Next.js and Tailwind CSS. 🔐 Integrated Firebase for secure user authentication. ✅ Day 2 – Core Features Development 👨‍🏫 Developed registration & login pages for student and teacher roles. 📚 Built UI for course creation and listing, accessible by teachers. 🧠 Integrated OpenAI API to generate structured notes from unstructured content. 🌿 Set up MongoDB + Express for storing course and user data. ✅ Day 3 – Smart Tools & Finishing Touches 🧭 Developed a mind map generator to convert topics into interactive visual trees. 📈 Implemented basic student progress tracking. 🎨 Enhanced UI for better usability and visual appeal. 🐞 Debugged, tested, and optimized performance across pages. 📹 Prepared demo, pitch, and project documentation. 🌟 Completed Hackathon Goals Course Creation Module Student/Teacher Registration & Auth AI Note Generator Mind Map Generator Full-Stack Integration Responsive Design Polished UI + Functional Demo 🔜 Post-Hackathon Plans 📅 Assignment scheduling & quiz modules 🎥 Live class feature via ZegoCloud 📲 Convert into a full mobile app 🏅 AI-based certificate generation 🧪 More personalized AI tutor features
+
+
+
