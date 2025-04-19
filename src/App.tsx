@@ -22,6 +22,8 @@ import StudentProfile from "./pages/student/StudentProfile";
 import TeacherProfile from "./pages/teacher/TeacherProfile";
 import CourseSearch from "./pages/CourseSearch";
 import About from "./pages/About";
+import StudentChatPage from "./pages/student/ChatPage";
+import TeacherChatPage from "./pages/teacher/ChatPage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,7 @@ const App = () => (
               {/* Student Routes */}
               <Route path="/student/dashboard" element={<StudentDashboard />} />
               <Route path="/student/profile" element={<StudentProfile />} />
+              <Route path="/student/chat" element={<StudentChatPage />} />
               <Route path="/course/:id" element={<CourseView />} />
               <Route path="/assignment/:id" element={<AssignmentView />} />
               <Route path="/mock-test/:id" element={<MockTest />} />
@@ -48,6 +51,7 @@ const App = () => (
               {/* Teacher Routes */}
               <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
               <Route path="/teacher/profile" element={<TeacherProfile />} />
+              <Route path="/teacher/chat" element={<TeacherChatPage />} />
               <Route path="/teacher/course/:id" element={<TeacherCourseView />} />
               <Route path="/teacher/create-course" element={<CourseCreation />} />
               <Route path="/teacher/create-assignment" element={<AssignmentCreation />} />

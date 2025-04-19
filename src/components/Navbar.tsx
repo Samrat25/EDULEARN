@@ -6,7 +6,7 @@ import NotesGenerator from './NotesGenerator';
 import MindMapGenerator from './MindMapGenerator';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut, BookOpen, Home, Info, Search, FileText, Network } from 'lucide-react';
+import { User, LogOut, BookOpen, Home, Info, Search, FileText, Network, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
@@ -23,6 +23,10 @@ export function Navbar() {
 
   const getDashboardPath = () => {
     return currentUser?.role === 'student' ? '/student/dashboard' : '/teacher/dashboard';
+  };
+  
+  const getChatPath = () => {
+    return currentUser?.role === 'student' ? '/student/chat' : '/teacher/chat';
   };
 
   return (
@@ -115,6 +119,12 @@ export function Navbar() {
                   <Link to={`/${currentUser?.role}/profile`}>
                     <DropdownMenuItem className="cursor-pointer">
                       Profile
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to={getChatPath()}>
+                    <DropdownMenuItem className="cursor-pointer">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      <span>Messages</span>
                     </DropdownMenuItem>
                   </Link>
                   <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { PageLayout } from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -13,10 +12,13 @@ import { Course } from '@/types/course';
 import { getCoursesByTeacherId } from '@/services/courseService';
 import { getAllAssignments, getAssignmentsByCourseId, getSubmissionsByAssignmentId, getAllSubmissions } from '@/services/assignmentService';
 import { getAllTests, getTestsByCourseId, getTestSubmissionsByTestId, getAllTestSubmissions } from '@/services/testService';
+import { getChatThreadsByTeacherId } from '@/services/chatService';
 import { useToast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getStudentById } from '@/services/userService';
+import { MessageCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const TeacherDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -36,6 +38,8 @@ const TeacherDashboard = () => {
   const [newVideoTitle, setNewVideoTitle] = useState('');
   const [newVideoDuration, setNewVideoDuration] = useState('');
   const [newVideoDescription, setNewVideoDescription] = useState('');
+  const [chatThreads, setChatThreads] = useState<any[]>([]);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated || currentUser?.role !== 'teacher') {
@@ -108,6 +112,14 @@ const TeacherDashboard = () => {
       
       // Test results are already included in the test submissions
       setTestResults(allTestSubmissions);
+      
+      // Get chat threads
+      const threads = getChatThreadsByTeacherId(currentUser.id);
+      setChatThreads(threads);
+      
+      // Count unread messages
+      const unread = threads.reduce((count, thread) => count + thread.unreadCount, 0);
+      setUnreadMessageCount(unread);
     }
   }, [currentUser, isAuthenticated, navigate]);
 
@@ -150,7 +162,7 @@ const TeacherDashboard = () => {
           </div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
@@ -182,6 +194,29 @@ const TeacherDashboard = () => {
             <CardContent>
               <div className="text-2xl font-bold">{testSubmissions.length}</div>
             </CardContent>
+          </Card>
+          <Card className="bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
+            <Link to="/teacher/chat">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  Student Messages
+                  {unreadMessageCount > 0 && (
+                    <Badge variant="default" className="ml-1">
+                      {unreadMessageCount}
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{chatThreads.length}</div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" size="sm" className="w-full">
+                  View Messages
+                </Button>
+              </CardFooter>
+            </Link>
           </Card>
         </div>
 

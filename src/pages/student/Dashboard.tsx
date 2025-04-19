@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { PageLayout } from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,9 @@ import { Course } from '@/types/course';
 import { getAllCourses, getEnrolledCourses, enrollStudent } from '@/services/courseService';
 import { getSubmissionsByStudentId } from '@/services/assignmentService';
 import { getTestSubmissionsByStudentId } from '@/services/testService';
+import { getChatThreadsByStudentId } from '@/services/chatService';
 import { useToast } from '@/components/ui/use-toast';
+import { BookOpen, MessageCircle } from 'lucide-react';
 
 const StudentDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -22,6 +23,7 @@ const StudentDashboard = () => {
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [assignmentCount, setAssignmentCount] = useState(0);
   const [testCount, setTestCount] = useState(0);
+  const [messageCount, setMessageCount] = useState(0);
   const [activeTab, setActiveTab] = useState("my-courses");
 
   useEffect(() => {
@@ -45,6 +47,10 @@ const StudentDashboard = () => {
 
       const tests = getTestSubmissionsByStudentId(currentUser.id);
       setTestCount(tests.length);
+      
+      // Get chat threads
+      const chatThreads = getChatThreadsByStudentId(currentUser.id);
+      setMessageCount(chatThreads.length);
     }
   }, [currentUser, isAuthenticated, navigate]);
 
@@ -89,7 +95,7 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Enrolled Courses</CardTitle>
@@ -121,6 +127,24 @@ const StudentDashboard = () => {
             <CardContent>
               <div className="text-2xl font-bold">{availableCourses.length}</div>
             </CardContent>
+          </Card>
+          <Card className="bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
+            <Link to="/student/chat">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  Course Messages
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{messageCount}</div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" size="sm" className="w-full">
+                  View Messages
+                </Button>
+              </CardFooter>
+            </Link>
           </Card>
         </div>
 

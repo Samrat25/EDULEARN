@@ -5,49 +5,92 @@ import { getAllCourses } from '@/services/courseService';
 import { CourseCard } from '@/components/CourseCard';
 import { useEffect, useState } from 'react';
 import { Course } from '@/types/course';
+import HeroBackground from '@/components/HeroBackground';
 
 const Index = () => {
   const [featuredCourses, setFeaturedCourses] = useState<Course[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     // In a real app, you'd have an API call for featured courses
     const courses = getAllCourses();
     setFeaturedCourses(courses.slice(0, 3)); // Just get first 3 for featured section
+    setIsMounted(true); // Mark component as mounted
   }, []);
 
   return (
     <PageLayout>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary/90 to-background py-16 md:py-24">
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
-            <div className="flex flex-col justify-center space-y-4">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl text-white">
-                  Learn, Connect, Thrive
+      {/* Hero Section with optimized background */}
+      <section className="relative dark-gradient-bg py-20 md:py-28 overflow-hidden min-h-[600px] flex items-center">
+        {/* Keep only the main 3D background for better performance */}
+        <HeroBackground />
+        
+        {/* Animated overlays - kept simple */}
+        <div className="hero-gradient animate-pulse-slow"></div>
+        <div className="absolute inset-0 bg-black/20 z-[1]"></div>
+        
+        {/* Light streaks effect - reduced to just 3 */}
+        <div className="absolute inset-0 z-[1] overflow-hidden opacity-10">
+          {[...Array(3)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute h-px bg-white animate-float" 
+              style={{
+                width: `${Math.random() * 40 + 10}%`,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                opacity: Math.random() * 0.5 + 0.25,
+                transform: `rotate(${Math.random() * 360}deg)`,
+                animationDelay: `${i * 0.5}s`,
+                animationDuration: `${Math.random() * 5 + 5}s`
+              }}
+            ></div>
+          ))}
+        </div>
+        
+        {/* Content overlay */}
+        <div className="container px-4 md:px-6 relative z-10">
+          <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2 items-center">
+            <div className="flex flex-col justify-center space-y-6">
+              <div className="space-y-4">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-white drop-shadow-md opacity-0 animate-slide-up">
+                  <span className="animate-text-shimmer">Learn, Connect, Thrive</span>
                 </h1>
-                <p className="max-w-[600px] text-white/90 md:text-xl">
+                <p className="max-w-[600px] text-white/90 md:text-xl drop-shadow opacity-0 animate-slide-up delay-200">
                   Our platform connects students with teachers for a personalized learning experience.
                   Enroll in courses, complete assignments, and test your knowledge.
                 </p>
               </div>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row">
+              <div className="flex flex-col gap-3 min-[400px]:flex-row opacity-0 animate-slide-up delay-400">
                 <Link to="/register">
-                  <Button size="lg" className="bg-white text-primary hover:bg-white/90">Get Started</Button>
+                  <Button 
+                    size="lg" 
+                    className="bg-primary text-white hover:bg-primary/90 shadow-lg transition-all hover:shadow-primary/40 hover:shadow-xl animate-glow"
+                  >
+                    Get Started
+                  </Button>
                 </Link>
                 <Link to="/courses">
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">Browse Courses</Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="border-primary text-white hover:bg-primary/10 backdrop-blur-sm transition-all hover:shadow-primary/20 hover:shadow-lg"
+                  >
+                    Browse Courses
+                  </Button>
                 </Link>
               </div>
             </div>
-            <div className="flex items-center justify-center">
-              <img 
-                src="/Logo.png" 
-                alt="EduLearn Logo" 
-                className="aspect-auto overflow-hidden rounded-xl object-contain object-center max-h-80"
-                width={400}
-                height={400}
-              />
+            <div className="flex items-center justify-center opacity-0 animate-slide-up delay-300">
+              <div className="bg-gray-800/30 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-primary/20 max-w-md hover:bg-gray-800/50 transition-all duration-500 transform hover:scale-105 hover:shadow-primary/20 hover:shadow-2xl animate-float">
+                <img 
+                  src="/Logo.png" 
+                  alt="EduLearn Logo" 
+                  className="aspect-auto overflow-hidden object-contain object-center max-h-80 w-full"
+                  width={400}
+                  height={400}
+                />
+              </div>
             </div>
           </div>
         </div>
