@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { searchWikipedia, getArticleContent, getFullArticleContent, createRoadmapFromArticle, type WikipediaArticle, type WikipediaSearchResult, type RoadmapData, type WikipediaSection } from "../services/Wikipedia";
+import { searchWikipedia, getArticleContent, getFullArticleContent, createRoadmapFromArticle, type WikipediaArticle, type WikipediaSearchResult, type RoadmapData, type WikipediaSection } from "../services/wikipedia";
 import { Search, Download, Network, ArrowRight } from "lucide-react";
 import LoadingButton from "./LoadingButton";
 import ForceGraph2D from "react-force-graph-2d";

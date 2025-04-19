@@ -199,7 +199,11 @@ const TeacherCourseView = () => {
               <p className="text-muted-foreground">Created by you</p>
             </div>
             <div className="flex gap-3">
-              <Link to={`/teacher/create-assignment?courseId=${course.id}`}>
+              <Link 
+                to={`/teacher/create-assignment?courseId=${course.id}`}
+                data-testid="create-assignment-link"
+                className="inline-block"
+              >
                 <Button variant="outline">Create Assignment</Button>
               </Link>
               <Link to={`/teacher/create-test?courseId=${course.id}`}>
@@ -282,13 +286,21 @@ const TeacherCourseView = () => {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-medium">Course Assignments</h3>
-                    <Link to={`/teacher/create-assignment?courseId=${course.id}`}>
+                    <Link 
+                      to={`/teacher/create-assignment?courseId=${course.id}`}
+                      data-testid="create-assignment-tab-link"
+                      className="inline-block"
+                    >
                       <Button size="sm">
                         <PlusCircle className="h-4 w-4 mr-2" />
                         Create Assignment
                       </Button>
                     </Link>
                   </div>
+                  
+                  <p className="text-sm text-muted-foreground mb-4">
+                    All assignments use multiple choice questions and are automatically checked when students submit.
+                  </p>
                   
                   {assignments.length > 0 ? (
                     <div className="space-y-4">
@@ -314,7 +326,11 @@ const TeacherCourseView = () => {
                   ) : (
                     <div className="text-center p-6 border rounded-lg border-dashed">
                       <p className="mb-4">No assignments created for this course yet.</p>
-                      <Link to={`/teacher/create-assignment?courseId=${course.id}`}>
+                      <Link 
+                        to={`/teacher/create-assignment?courseId=${course.id}`}
+                        data-testid="create-assignment-empty-link"
+                        className="inline-block"
+                      >
                         <Button>Create Assignment</Button>
                       </Link>
                     </div>

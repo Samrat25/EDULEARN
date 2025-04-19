@@ -1,4 +1,3 @@
-
 export interface Assignment {
   id: string;
   title: string;
@@ -36,4 +35,6 @@ export interface AssignmentAnswer {
   selectedOption?: string;
   feedback?: string;
   rating?: number;
+  correctAnswer?: string;
+  type?: 'text' | 'file' | 'mcq';
 }

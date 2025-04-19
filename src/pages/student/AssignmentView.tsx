@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +10,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { Assignment, AssignmentAnswer, AssignmentSubmission } from '@/types/assignment';
 import { getAssignmentById, getStudentSubmission, submitAssignment } from '@/services/assignmentService';
 import { getCourseById } from '@/services/courseService';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 const AssignmentView = () => {
   const { id } = useParams<{ id: string }>();
@@ -167,7 +168,7 @@ const AssignmentView = () => {
                       disabled={!!existingSubmission}
                       className="min-h-[100px]"
                     />
-                  ) : (
+                  ) : question.questionType === 'file' ? (
                     <div className="space-y-2">
                       <Input
                         type="file"
@@ -181,6 +182,49 @@ const AssignmentView = () => {
                             'No file'
                           }
                         </p>
+                      )}
+                    </div>
+                  ) : question.questionType === 'mcq' && (
+                    <div className="space-y-3 mt-4">
+                      <RadioGroup 
+                        value={answers.find(a => a.questionId === question.id)?.selectedOption || ''}
+                        onValueChange={(value) => {
+                          const updatedAnswers = [...answers];
+                          const answerIndex = updatedAnswers.findIndex(a => a.questionId === question.id);
+                          if (answerIndex !== -1) {
+                            updatedAnswers[answerIndex] = {
+                              ...updatedAnswers[answerIndex],
+                              selectedOption: value,
+                              answer: value
+                            };
+                            setAnswers(updatedAnswers);
+                          }
+                        }}
+                        disabled={!!existingSubmission}
+                      >
+                        {question.options?.map((option, index) => (
+                          <div key={index} className="flex items-center space-x-2">
+                            <RadioGroupItem value={option} id={`option-${question.id}-${index}`} />
+                            <Label htmlFor={`option-${question.id}-${index}`}>{option}</Label>
+                            
+                            {existingSubmission && answers.find(a => a.questionId === question.id)?.selectedOption === option && (
+                              <span className={`ml-2 text-sm ${option === answers.find(a => a.questionId === question.id)?.correctAnswer ? 'text-green-600' : 'text-red-600'}`}>
+                                {option === answers.find(a => a.questionId === question.id)?.correctAnswer ? '✓ Correct' : '✗ Incorrect'}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </RadioGroup>
+                      
+                      {existingSubmission && (
+                        <div className="mt-3 p-3 bg-secondary/20 rounded-md">
+                          <p className="text-sm font-medium">
+                            {answers.find(a => a.questionId === question.id)?.selectedOption === answers.find(a => a.questionId === question.id)?.correctAnswer 
+                              ? '✅ Your answer is correct!' 
+                              : `❌ Incorrect. The correct answer is: ${answers.find(a => a.questionId === question.id)?.correctAnswer}`
+                            }
+                          </p>
+                        </div>
                       )}
                     </div>
                   )}
