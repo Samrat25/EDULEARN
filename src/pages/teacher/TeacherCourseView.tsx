@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ThumbsUp, Eye, Film, PlusCircle } from 'lucide-react';
+import { ThumbsUp, Eye, Film, PlusCircle, CheckCircle } from 'lucide-react';
 import { Course, Lecture } from '@/types/course';
 import { Assignment } from '@/types/assignment';
 import { Test } from '@/types/test';
@@ -35,6 +35,7 @@ const TeacherCourseView = () => {
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
   const [viewCount, setViewCount] = useState(0);
   const [likeCount, setLikeCount] = useState(0);
+  const [completionCount, setCompletionCount] = useState(0);
   
   // New video state
   const [newVideoTitle, setNewVideoTitle] = useState('');
@@ -87,9 +88,23 @@ const TeacherCourseView = () => {
       });
       setTestSubmissions(allTestSubmissions);
       
-      // For demo purposes, set mock view and like counts
-      setViewCount(courseData ? courseData.students.length * 5 : 0);
-      setLikeCount(courseData ? Math.floor(courseData.students.length * 3.5) : 0);
+      // Calculate total likes, views, and completions from all lectures
+      if (courseData && courseData.lectures.length > 0) {
+        const totalLikes = courseData.lectures.reduce((sum, lecture) => sum + (lecture.likes || 0), 0);
+        setLikeCount(totalLikes);
+        
+        // Calculate views based on viewed property
+        const totalViews = courseData.lectures.reduce((sum, lecture) => sum + (lecture.viewed ? 1 : 0), 0);
+        setViewCount(totalViews > 0 ? totalViews : courseData.lectures.length * 4); // Use real data or fallback to estimate
+        
+        // Calculate completions based on completed property
+        const totalCompletions = courseData.lectures.reduce((sum, lecture) => sum + (lecture.completed ? 1 : 0), 0);
+        setCompletionCount(totalCompletions);
+      } else {
+        setViewCount(0);
+        setLikeCount(0);
+        setCompletionCount(0);
+      }
     }
   }, [id]);
 
@@ -262,7 +277,7 @@ const TeacherCourseView = () => {
                   )}
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="assignments" className="mt-6">
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
@@ -345,53 +360,102 @@ const TeacherCourseView = () => {
                                       <DialogHeader>
                                         <DialogTitle>Assignment Submission</DialogTitle>
                                       </DialogHeader>
-                                      <div className="mt-4 space-y-4">
-                                        <div>
-                                          <h4 className="font-medium">Assignment</h4>
-                                          <p>{submission.assignmentTitle}</p>
+                                      <div className="mt-4 space-y-6">
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div>
+                                            <h4 className="font-medium">Assignment</h4>
+                                            <p>{submission.assignmentTitle}</p>
+                                          </div>
+                                          <div>
+                                            <h4 className="font-medium">Student</h4>
+                                            <p>{submission.studentName}</p>
+                                          </div>
                                         </div>
-                                        <div>
-                                          <h4 className="font-medium">Student</h4>
-                                          <p>{submission.studentName}</p>
-                                        </div>
-                                        <div>
-                                          <h4 className="font-medium">Submitted</h4>
-                                          <p>{new Date(submission.submittedAt).toLocaleString()}</p>
-                                        </div>
-                                        <div>
-                                          <h4 className="font-medium">Answers</h4>
-                                          <div className="mt-2 space-y-3">
-                                            {submission.answers.map((answer: any, index: number) => (
-                                              <div key={index} className="p-3 border rounded-md">
-                                                <p className="font-medium">Question {index + 1}</p>
-                                                <p className="mt-1 text-sm">{answer.answer}</p>
-                                                {answer.fileUrl && (
-                                                  <a 
-                                                    href={answer.fileUrl} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
-                                                    className="text-primary hover:underline mt-2 block text-sm"
-                                                  >
-                                                    View Attached File
-                                                  </a>
-                                                )}
+                                        
+                                        <div className="border-t pt-4">
+                                          <h4 className="font-medium text-lg mb-4">Question Responses & Feedback</h4>
+                                          <div className="space-y-6">
+                                            {submission.answers && submission.answers.map((answer: any, index: number) => (
+                                              <div key={answer.questionId} className="border p-4 rounded-md">
+                                                <div className="flex justify-between items-start">
+                                                  <h5 className="font-medium">Question {index + 1}</h5>
+                                                  <div className="flex items-center gap-2">
+                                                    <span className="text-sm text-muted-foreground">Rating:</span>
+                                                    <div className="flex">
+                                                      {[1, 2, 3, 4, 5].map((star) => (
+                                                        <button
+                                                          key={star}
+                                                          type="button"
+                                                          className={`h-5 w-5 ${answer.rating >= star ? 'text-yellow-400' : 'text-gray-300'}`}
+                                                          onClick={() => {
+                                                            const updatedAnswers = [...submission.answers];
+                                                            updatedAnswers[index].rating = star;
+                                                            // This would normally update the submission
+                                                            console.log(`Question ${index + 1} rated ${star} stars`);
+                                                          }}
+                                                        >
+                                                          ★
+                                                        </button>
+                                                      ))}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                                
+                                                <div className="mt-2 mb-4">
+                                                  <p className="text-gray-800">{answer.questionText}</p>
+                                                </div>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                  <div className="p-3 bg-gray-50 rounded-md">
+                                                    <p className="text-sm font-medium text-gray-500">Student's Answer:</p>
+                                                    <div className="mt-1">
+                                                      {answer.type === 'mcq' ? (
+                                                        <div>
+                                                          <p className="font-medium">{answer.answer}</p>
+                                                          <div className="mt-2 text-sm">
+                                                            <span className="text-muted-foreground">Correct Answer: </span>
+                                                            <span className="text-green-600 font-medium">{answer.correctAnswer}</span>
+                                                          </div>
+                                                        </div>
+                                                      ) : (
+                                                        <p>{answer.answer}</p>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                  
+                                                  <div>
+                                                    <p className="text-sm font-medium text-gray-500 mb-1">Question Feedback:</p>
+                                                    <Textarea
+                                                      placeholder="Provide feedback for this question..."
+                                                      value={answer.feedback || ''}
+                                                      onChange={(e) => {
+                                                        const updatedAnswers = [...submission.answers];
+                                                        updatedAnswers[index].feedback = e.target.value;
+                                                        // This would normally update the submission
+                                                        console.log(`Feedback updated for question ${index + 1}`);
+                                                      }}
+                                                      className="min-h-[80px] text-sm"
+                                                    />
+                                                  </div>
+                                                </div>
                                               </div>
                                             ))}
                                           </div>
                                         </div>
+                                        
                                         <div className="pt-4 border-t">
-                                          <h4 className="font-medium mb-2">Feedback</h4>
+                                          <h4 className="font-medium mb-2">Overall Feedback</h4>
                                           <Textarea 
-                                            placeholder="Provide feedback to the student..."
+                                            placeholder="Provide overall feedback to the student..."
                                             value={submission.feedback || ''}
                                             onChange={(e) => {
                                               // This would normally update the submission feedback
                                               console.log('Feedback updated:', e.target.value);
                                             }}
-                                            className="mb-2"
+                                            className="mb-4"
                                           />
                                           <div className="flex items-center gap-4">
-                                            <Label htmlFor="grade">Grade:</Label>
+                                            <Label htmlFor="grade">Final Grade:</Label>
                                             <Input 
                                               id="grade"
                                               type="number" 
@@ -492,40 +556,101 @@ const TeacherCourseView = () => {
                                 <TableCell>
                                   <Dialog>
                                     <DialogTrigger asChild>
-                                      <Button variant="outline" size="sm">
+                                      <Button variant="outline" size="sm" onClick={() => setSelectedSubmission(submission)}>
                                         View Details
                                       </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="max-w-3xl">
+                                    <DialogContent className="max-w-4xl">
                                       <DialogHeader>
-                                        <DialogTitle>Test Submission</DialogTitle>
+                                        <DialogTitle>Test Submission - {submission.testTitle}</DialogTitle>
                                       </DialogHeader>
                                       <div className="mt-4 space-y-4">
-                                        <div>
-                                          <h4 className="font-medium">Test</h4>
-                                          <p>{submission.testTitle}</p>
+                                        <div className="grid grid-cols-3 gap-4">
+                                          <div>
+                                            <h4 className="font-medium">Student</h4>
+                                            <p>{submission.studentName}</p>
+                                          </div>
+                                          <div>
+                                            <h4 className="font-medium">Submitted</h4>
+                                            <p>{new Date(submission.submittedAt).toLocaleString()}</p>
+                                          </div>
+                                          <div>
+                                            <h4 className="font-medium">Time Taken</h4>
+                                            <p>{submission.timeTaken || 'N/A'} minutes</p>
+                                          </div>
                                         </div>
-                                        <div>
-                                          <h4 className="font-medium">Student</h4>
-                                          <p>{submission.studentName}</p>
-                                        </div>
-                                        <div>
-                                          <h4 className="font-medium">Submitted</h4>
-                                          <p>{new Date(submission.submittedAt).toLocaleString()}</p>
-                                        </div>
-                                        <div>
-                                          <h4 className="font-medium">Score</h4>
-                                          <p>{submission.score || 'N/A'} points</p>
-                                        </div>
-                                        <div>
-                                          <h4 className="font-medium">Answers</h4>
-                                          <div className="mt-2 space-y-3">
-                                            {submission.answers.map((answer: any, index: number) => (
-                                              <div key={index} className="p-3 border rounded-md">
-                                                <p className="font-medium">Question {index + 1}</p>
-                                                <p className="mt-1 text-sm">
-                                                  Selected Option: {answer.selectedOptionIndex + 1}
-                                                </p>
+                                        
+                                        <div className="border-t pt-4">
+                                          <div className="flex justify-between items-center mb-4">
+                                            <h4 className="font-medium text-lg">Test Results</h4>
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-sm text-muted-foreground">Score:</span>
+                                              <span className="font-bold text-xl bg-primary/10 px-3 py-1 rounded">
+                                                {submission.score || 0}/{submission.totalPossibleScore || 0}
+                                              </span>
+                                              <span className="text-sm text-muted-foreground ml-1">(
+                                                {submission.totalPossibleScore ? Math.round(((submission.score || 0) / submission.totalPossibleScore) * 100) : 0}%
+                                              )</span>
+                                            </div>
+                                          </div>
+                                          
+                                          <div className="space-y-6">
+                                            {submission.answers && submission.answers.map((answer: any, index: number) => (
+                                              <div key={answer.questionId} className="border p-4 rounded-md">
+                                                <div className="flex justify-between items-start mb-2">
+                                                  <h5 className="font-medium text-base">Question {index + 1} <span className="text-sm text-muted-foreground">({answer.points || 0} points)</span></h5>
+                                                  <div className="flex items-center gap-2">
+                                                    <span className={`px-2 py-1 rounded-full text-xs ${answer.correct ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                      {answer.correct ? 'Correct' : 'Incorrect'}
+                                                    </span>
+                                                    <span className="text-sm font-medium">
+                                                      {answer.correct ? answer.points || 0 : 0}/{answer.points || 0}
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                                
+                                                <p className="mb-4">{answer.questionText}</p>
+                                                
+                                                {answer.options && (
+                                                  <div className="space-y-2 mb-4">
+                                                    {answer.options.map((option: string, optIndex: number) => (
+                                                      <div 
+                                                        key={optIndex}
+                                                        className={`p-2 border rounded flex items-center ${option === answer.selectedOption ? 'border-blue-500 bg-blue-50' : ''} ${
+                                                          option === answer.correctOption ? 'border-green-500 bg-green-50' : ''
+                                                        } ${
+                                                          option === answer.selectedOption && option !== answer.correctOption ? 'border-red-500 bg-red-50' : ''
+                                                        }`}
+                                                      >
+                                                        <div className="mr-2">
+                                                          {option === answer.selectedOption && option === answer.correctOption && (
+                                                            <CheckCircle className="h-4 w-4 text-green-500" />
+                                                          )}
+                                                          {option === answer.selectedOption && option !== answer.correctOption && (
+                                                            <span className="text-red-500 font-bold">✗</span>
+                                                          )}
+                                                          {option === answer.correctOption && option !== answer.selectedOption && (
+                                                            <span className="text-green-500 font-bold">✓</span>
+                                                          )}
+                                                        </div>
+                                                        <span>{option}</span>
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                )}
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 p-2 bg-gray-50 rounded-md">
+                                                  <div>
+                                                    <span className="text-sm font-medium">Student selected: </span>
+                                                    <span className={answer.correct ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
+                                                      {answer.selectedOption}
+                                                    </span>
+                                                  </div>
+                                                  <div>
+                                                    <span className="text-sm font-medium">Correct answer: </span>
+                                                    <span className="text-green-600 font-medium">{answer.correctOption}</span>
+                                                  </div>
+                                                </div>
                                               </div>
                                             ))}
                                           </div>
@@ -616,7 +741,7 @@ const TeacherCourseView = () => {
                 </div>
                 <div>
                   <h3 className="font-medium">Course Statistics</h3>
-                  <div className="mt-4 grid grid-cols-3 gap-4">
+                  <div className="mt-4 grid grid-cols-4 gap-4">
                     <div className="flex flex-col items-center space-y-1">
                       <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/10">
                         <Film className="h-5 w-5 text-primary" />
@@ -636,7 +761,14 @@ const TeacherCourseView = () => {
                         <ThumbsUp className="h-5 w-5 text-primary" />
                       </div>
                       <p className="text-xl font-semibold">{likeCount}</p>
-                      <p className="text-xs text-muted-foreground">Likes</p>
+                      <p className="text-xs text-muted-foreground">Total Likes</p>
+                    </div>
+                    <div className="flex flex-col items-center space-y-1">
+                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/10">
+                        <CheckCircle className="h-5 w-5 text-primary" />
+                      </div>
+                      <p className="text-xl font-semibold">{completionCount}</p>
+                      <p className="text-xs text-muted-foreground">Completions</p>
                     </div>
                   </div>
                 </div>

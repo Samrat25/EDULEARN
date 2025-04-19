@@ -12,8 +12,10 @@ export interface Assignment {
 export interface AssignmentQuestion {
   id: string;
   question: string;
-  questionType: 'text' | 'file';
+  questionType: 'text' | 'file' | 'mcq';
   points: number;
+  options?: string[];
+  correctAnswer?: string;
 }
 
 export interface AssignmentSubmission {
@@ -31,4 +33,7 @@ export interface AssignmentAnswer {
   questionId: string;
   answer: string;
   fileUrl?: string;
+  selectedOption?: string;
+  feedback?: string;
+  rating?: number;
 }

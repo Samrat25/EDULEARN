@@ -32,6 +32,7 @@ const TestCreation = () => {
   const [description, setDescription] = useState('');
   const [courseId, setCourseId] = useState('');
   const [duration, setDuration] = useState(30); // Default 30 minutes
+  const [totalMarks, setTotalMarks] = useState(100); // Default 100 marks
   const [questions, setQuestions] = useState<QuestionInput[]>([
     {
       question: '',
@@ -180,15 +181,19 @@ const TestCreation = () => {
         id: `question_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
       }));
       
-      const testData = {
+      const test = {
+        id: `test-${Date.now()}`,
         title,
         description,
         courseId,
+        teacherId: currentUser.id,
         duration,
-        questions: questionsWithIds
+        totalMarks,
+        questions: questionsWithIds,
+        createdAt: Date.now(),
       };
       
-      const createdTest = createTest(testData);
+      const createdTest = createTest(test);
       
       toast({
         title: 'Test created',
@@ -221,63 +226,73 @@ const TestCreation = () => {
               <CardTitle>Test Details</CardTitle>
               <CardDescription>Enter the basic information about this test</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="course">Course *</Label>
-                <Select
-                  value={courseId}
-                  onValueChange={setCourseId}
-                  required
-                >
-                  <SelectTrigger id="course">
-                    <SelectValue placeholder="Select a course" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {courses.length > 0 ? (
-                      courses.map((course) => (
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Test Title *</Label>
+                  <Input
+                    id="title"
+                    placeholder="Enter test title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="course">Select Course *</Label>
+                  <Select value={courseId} onValueChange={setCourseId} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a course" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {courses.map((course) => (
                         <SelectItem key={course.id} value={course.id}>
                           {course.title}
                         </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="none" disabled>
-                        No courses available
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="title">Test Title *</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Midterm Exam: Web Development"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Test Description *</Label>
+                <Label htmlFor="description">Description *</Label>
                 <Textarea
                   id="description"
+                  placeholder="Enter test description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Provide instructions and details about the test..."
-                  className="min-h-[100px]"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="duration">Duration (minutes) *</Label>
-                <Input
-                  id="duration"
-                  type="number"
-                  min="5"
-                  value={duration}
-                  onChange={(e) => setDuration(parseInt(e.target.value) || 30)}
-                  required
-                />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duration (minutes) *</Label>
+                  <Input
+                    id="duration"
+                    type="number"
+                    min="5"
+                    max="180"
+                    value={duration}
+                    onChange={(e) => setDuration(parseInt(e.target.value) || 30)}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="totalMarks">Total Marks *</Label>
+                  <Input
+                    id="totalMarks"
+                    type="number"
+                    min="10"
+                    max="500"
+                    value={totalMarks}
+                    onChange={(e) => setTotalMarks(parseInt(e.target.value) || 100)}
+                    required
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

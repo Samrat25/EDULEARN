@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageLayout } from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -29,29 +29,65 @@ const AssignmentCreation = () => {
   const [questions, setQuestions] = useState<Omit<AssignmentQuestion, 'id'>[]>([
     {
       question: '',
-      questionType: 'text',
-      points: 10
+      questionType: 'mcq',
+      points: 10,
+      options: ['', '', '', ''],
+      correctAnswer: ''
     }
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Get courseId from query parameters
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const courseIdParam = searchParams.get('courseId');
+  
   useEffect(() => {
     if (!currentUser) return;
     
     const teacherCourses = getCoursesByTeacherId(currentUser.id);
     setCourses(teacherCourses);
     
-    if (teacherCourses.length > 0) {
+    // If courseId is provided in URL, use it
+    if (courseIdParam && teacherCourses.some(course => course.id === courseIdParam)) {
+      setCourseId(courseIdParam);
+    } else if (teacherCourses.length > 0) {
       setCourseId(teacherCourses[0].id);
     }
   }, [currentUser]);
 
-  const handleQuestionChange = (index: number, field: keyof Omit<AssignmentQuestion, 'id'>, value: string | number) => {
+  const handleQuestionChange = (index: number, field: keyof Omit<AssignmentQuestion, 'id'>, value: string | number | string[]) => {
     const updatedQuestions = [...questions];
-    updatedQuestions[index] = {
-      ...updatedQuestions[index],
-      [field]: field === 'points' ? Number(value) : value
-    };
+    
+    if (field === 'options' && typeof value === 'string') {
+      // Handle options which are passed as a delimited string
+      updatedQuestions[index] = {
+        ...updatedQuestions[index],
+        options: value.split('||')
+      };
+    } else if (field === 'questionType') {
+      // When changing question type, set up the appropriate defaults
+      const questionType = value as 'text' | 'file' | 'mcq';
+      if (questionType === 'mcq' && (!updatedQuestions[index].options || updatedQuestions[index].options.length === 0)) {
+        updatedQuestions[index] = {
+          ...updatedQuestions[index],
+          [field]: questionType,
+          options: ['', '', '', ''],
+          correctAnswer: ''
+        };
+      } else {
+        updatedQuestions[index] = {
+          ...updatedQuestions[index],
+          [field]: questionType
+        };
+      }
+    } else {
+      // Handle normal fields
+      updatedQuestions[index] = {
+        ...updatedQuestions[index],
+        [field]: field === 'points' ? Number(value) : value
+      };
+    }
     setQuestions(updatedQuestions);
   };
 
@@ -60,8 +96,10 @@ const AssignmentCreation = () => {
       ...questions,
       {
         question: '',
-        questionType: 'text',
-        points: 10
+        questionType: 'mcq',
+        points: 10,
+        options: ['', '', '', ''],
+        correctAnswer: ''
       }
     ]);
   };
@@ -99,6 +137,20 @@ const AssignmentCreation = () => {
       toast({
         title: 'Validation error',
         description: 'Please fill in all question details.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // Validate MCQ options and correct answers
+    const invalidMCQQuestions = questions.some(q => 
+      !q.options || q.options.some(opt => !opt) || !q.correctAnswer
+    );
+    
+    if (invalidMCQQuestions) {
+      toast({
+        title: 'Validation error',
+        description: 'Please fill in all options and select the correct answer for each question.',
         variant: 'destructive',
       });
       return;
@@ -247,24 +299,17 @@ const AssignmentCreation = () => {
                     </div>
                     <div className="space-y-2">
                       <Label>Question Type</Label>
-                      <RadioGroup
-                        value={question.questionType}
-                        onValueChange={(value) => handleQuestionChange(index, 'questionType', value as 'text' | 'file')}
-                        className="flex flex-col space-y-1"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="text" id={`text-${index}`} />
-                          <Label htmlFor={`text-${index}`} className="font-normal">
-                            Text Response
-                          </Label>
+                      <div className="p-2 border rounded-md bg-gray-50">
+                        <div className="flex items-center">
+                          <span className="font-medium text-primary">Multiple Choice Questions</span>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="file" id={`file-${index}`} />
-                          <Label htmlFor={`file-${index}`} className="font-normal">
-                            File Upload
-                          </Label>
-                        </div>
-                      </RadioGroup>
+                        <p className="text-xs text-muted-foreground mt-1">All questions must be multiple choice</p>
+                      </div>
+                      <input 
+                        type="hidden" 
+                        value="mcq" 
+                        name={`questionType-${index}`} 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor={`points-${index}`}>Points *</Label>
@@ -277,6 +322,38 @@ const AssignmentCreation = () => {
                         onChange={(e) => handleQuestionChange(index, 'points', e.target.value)}
                         required
                       />
+                    </div>
+                    <div className="space-y-4 mt-4 p-3 border rounded-md bg-secondary/20">
+                      <div className="space-y-2">
+                        <Label>Multiple Choice Options</Label>
+                        {question.options?.map((option, optionIndex) => (
+                          <div key={optionIndex} className="flex items-center gap-2 mb-2">
+                            <RadioGroupItem 
+                              value={option} 
+                              id={`option-${index}-${optionIndex}`}
+                              checked={question.correctAnswer === option}
+                              onClick={() => {
+                                if (option) {
+                                  handleQuestionChange(index, 'correctAnswer', option);
+                                }
+                              }}
+                            />
+                            <Input
+                              placeholder={`Option ${optionIndex + 1}`}
+                              value={option}
+                              onChange={(e) => {
+                                const newOptions = [...(question.options || [])];
+                                newOptions[optionIndex] = e.target.value;
+                                handleQuestionChange(index, 'options', newOptions.join('||'));
+                              }}
+                              className="flex-1"
+                            />
+                          </div>
+                        ))}
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Select the radio button next to the correct option.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

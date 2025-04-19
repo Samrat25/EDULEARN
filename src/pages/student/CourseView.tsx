@@ -6,13 +6,14 @@ import { PageLayout } from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, ThumbsUp, Heart } from 'lucide-react';
 import { Course, Lecture } from '@/types/course';
 import { Assignment } from '@/types/assignment';
 import { Test } from '@/types/test';
-import { getCourseById } from '@/services/courseService';
+import { getCourseById, updateCourse } from '@/services/courseService';
 import { getAssignmentsByCourseId } from '@/services/assignmentService';
 import { getTestsByCourseId } from '@/services/testService';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const CourseView = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +24,8 @@ const CourseView = () => {
   const [tests, setTests] = useState<Test[]>([]);
   const [currentLecture, setCurrentLecture] = useState<Lecture | null>(null);
   const [watchedVideos, setWatchedVideos] = useState<string[]>([]);
+  const [completedVideos, setCompletedVideos] = useState<string[]>([]);
+  const [likedVideos, setLikedVideos] = useState<string[]>([]);
   const [progressPercent, setProgressPercent] = useState(0);
   const videoRef = useRef<HTMLIFrameElement>(null);
 
@@ -47,11 +50,40 @@ const CourseView = () => {
       if (savedWatchedVideos) {
         const parsed = JSON.parse(savedWatchedVideos);
         setWatchedVideos(parsed);
+      }
+      
+      // Load completed videos from local storage
+      const savedCompletedVideos = localStorage.getItem(`completedVideos-${id}`);
+      if (savedCompletedVideos) {
+        const parsed = JSON.parse(savedCompletedVideos);
+        setCompletedVideos(parsed);
         
-        // Calculate progress percentage
+        // Calculate progress percentage based on completed videos
         if (courseData && courseData.lectures.length > 0) {
           const progress = (parsed.length / courseData.lectures.length) * 100;
           setProgressPercent(progress);
+        }
+      }
+      
+      // Load liked videos from local storage
+      const savedLikedVideos = localStorage.getItem(`likedVideos-${id}`);
+      if (savedLikedVideos) {
+        const parsed = JSON.parse(savedLikedVideos);
+        setLikedVideos(parsed);
+        
+        // Update likes count in course data if needed
+        if (courseData) {
+          let needsUpdate = false;
+          courseData.lectures.forEach(lecture => {
+            if (parsed.includes(lecture.id) && !lecture.likes) {
+              lecture.likes = (lecture.likes || 0) + 1;
+              needsUpdate = true;
+            }
+          });
+          
+          if (needsUpdate) {
+            updateCourse(courseData.id, courseData);
+          }
         }
       }
     }
@@ -86,6 +118,81 @@ const CourseView = () => {
         
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
+            <div className="mb-4">
+              <h2 className="text-2xl font-semibold mb-2">{currentLecture?.title}</h2>
+              <p className="text-sm text-muted-foreground">{currentLecture?.description}</p>
+              <div className="flex justify-between items-center mt-2">
+                <p className="text-xs text-muted-foreground">Duration: {currentLecture?.duration} minutes</p>
+                
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-1">
+                    <Checkbox 
+                      id={`complete-${currentLecture?.id}`}
+                      checked={completedVideos.includes(currentLecture?.id || '')}
+                      onCheckedChange={(checked) => {
+                        if (!currentLecture) return;
+                        
+                        const newCompletedVideos = checked 
+                          ? [...completedVideos, currentLecture.id]
+                          : completedVideos.filter(id => id !== currentLecture.id);
+                        
+                        setCompletedVideos(newCompletedVideos);
+                        localStorage.setItem(`completedVideos-${id}`, JSON.stringify(newCompletedVideos));
+                        
+                        // Update progress percentage
+                        if (course && course.lectures.length > 0) {
+                          const progress = (newCompletedVideos.length / course.lectures.length) * 100;
+                          setProgressPercent(progress);
+                        }
+                      }}
+                    />
+                    <label htmlFor={`complete-${currentLecture?.id}`} className="text-sm cursor-pointer">Mark as completed</label>
+                  </div>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`flex items-center gap-1 ${likedVideos.includes(currentLecture?.id || '') ? 'text-red-500' : ''}`}
+                    onClick={() => {
+                      if (!currentLecture) return;
+                      
+                      // Toggle like status
+                      const isLiked = likedVideos.includes(currentLecture.id);
+                      const newLikedVideos = isLiked
+                        ? likedVideos.filter(id => id !== currentLecture.id)
+                        : [...likedVideos, currentLecture.id];
+                      
+                      setLikedVideos(newLikedVideos);
+                      localStorage.setItem(`likedVideos-${id}`, JSON.stringify(newLikedVideos));
+                      
+                      // Update course likes if needed
+                      if (course) {
+                        const updatedCourse = {...course};
+                        const lectureIndex = updatedCourse.lectures.findIndex(l => l.id === currentLecture.id);
+                        
+                        if (lectureIndex >= 0) {
+                          // Get current likes count or default to 0
+                          const currentLikes = updatedCourse.lectures[lectureIndex].likes || 0;
+                          
+                          // If currently liked, decrement (but don't go below 0)
+                          // If not currently liked, increment by 1
+                          updatedCourse.lectures[lectureIndex].likes = isLiked
+                            ? Math.max(0, currentLikes - 1)
+                            : currentLikes + 1;
+                          
+                          setCourse(updatedCourse);
+                          updateCourse(updatedCourse.id, updatedCourse);
+                        }
+                      }
+                    }}
+                  >
+                    <Heart className={`h-4 w-4 ${likedVideos.includes(currentLecture?.id || '') ? 'fill-current' : ''}`} />
+                    <span>Like</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <Card className="mb-6">
               <div className="relative aspect-video w-full overflow-hidden">
                 {currentLecture?.videoUrl ? (
@@ -215,21 +322,17 @@ const CourseView = () => {
           <div>
             <Card>
               <CardHeader>
-                <CardTitle>Course Information</CardTitle>
+                <CardTitle>Course Progress</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h3 className="font-medium">Description</h3>
-                  <p className="text-sm text-muted-foreground">{course.description}</p>
-                </div>
-                <div>
-                  <h3 className="font-medium">Progress</h3>
-                  <div className="mt-2 flex justify-center">
-                    <div className="relative h-20 w-20">
-                      <svg className="h-full w-full" viewBox="0 0 100 100">
+                  <h3 className="font-medium">Your Progress</h3>
+                  <div className="mt-4 flex flex-col items-center">
+                    <div className="relative h-24 w-24">
+                      <svg viewBox="0 0 100 100" className="h-full w-full">
                         {/* Background circle */}
                         <circle
-                          className="fill-none stroke-secondary"
+                          className="fill-none stroke-muted-foreground/20"
                           cx="50"
                           cy="50"
                           r="40"
@@ -253,7 +356,7 @@ const CourseView = () => {
                     </div>
                   </div>
                   <p className="mt-2 text-center text-xs text-muted-foreground">
-                    {watchedVideos.length}/{course.lectures.length} videos completed
+                    {completedVideos.length}/{course.lectures.length} videos completed
                   </p>
                 </div>
                 <div>

@@ -182,19 +182,33 @@ const MockTest = () => {
             </CardHeader>
             <CardContent className="flex flex-col items-center">
               <div className="text-5xl font-bold mb-4">
-                {submission.score} / {test.questions.reduce((sum, q) => sum + q.points, 0)}
+                {submission.score} / {test.totalMarks || test.questions.reduce((sum, q) => sum + q.points, 0)}
               </div>
-              <Progress value={submission.score ? (submission.score / test.questions.reduce((sum, q) => sum + q.points, 0)) * 100 : 0} className="h-4 w-full max-w-md" />
-              <p className="mt-4 text-muted-foreground">
-                Submitted on: {new Date(submission.submittedAt).toLocaleString()}
-              </p>
+              <Progress 
+                value={submission.score && (test.totalMarks || test.questions.reduce((sum, q) => sum + q.points, 0)) > 0 ? 
+                  (submission.score / (test.totalMarks || test.questions.reduce((sum, q) => sum + q.points, 0))) * 100 : 0} 
+                className="h-4 w-full max-w-md" 
+              />
+              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mt-4 text-center sm:text-left">
+                <p className="text-muted-foreground">
+                  Submitted on: {new Date(submission.submittedAt).toLocaleString()}
+                </p>
+                {submission.timeTaken && (
+                  <p className="text-muted-foreground">
+                    Time taken: {submission.timeTaken} minutes
+                  </p>
+                )}
+              </div>
             </CardContent>
           </Card>
           
           <div className="space-y-8">
             {test.questions.map((question, index) => {
               const userAnswer = submission.answers.find(a => a.questionId === question.id);
-              const isCorrect = userAnswer?.selectedOptionIndex === question.correctOptionIndex;
+              // Use the correct property from the answer if available, otherwise fall back to index comparison
+              const isCorrect = userAnswer?.correct !== undefined ? 
+                userAnswer.correct : 
+                userAnswer?.selectedOptionIndex === question.correctOptionIndex;
               
               return (
                 <Card key={question.id} className={isCorrect ? 'border-green-500' : 'border-red-500'}>
@@ -209,20 +223,37 @@ const MockTest = () => {
                   <CardContent>
                     <p className="mb-4">{question.question}</p>
                     <div className="space-y-2">
-                      {question.options.map((option, i) => (
-                        <div 
-                          key={i} 
-                          className={`p-3 rounded-lg ${
-                            i === question.correctOptionIndex 
-                              ? 'bg-green-100 border border-green-500' 
-                              : i === userAnswer?.selectedOptionIndex 
+                      {question.options.map((option, i) => {
+                        const isUserSelected = i === userAnswer?.selectedOptionIndex;
+                        const isCorrectOption = i === question.correctOptionIndex;
+                        
+                        return (
+                          <div 
+                            key={i} 
+                            className={`p-3 rounded-lg flex items-center ${
+                              isCorrectOption && isUserSelected
+                                ? 'bg-green-100 border border-green-500' 
+                                : isCorrectOption
+                                ? 'bg-green-50 border border-green-300' 
+                                : isUserSelected
                                 ? 'bg-red-100 border border-red-500' 
                                 : 'bg-gray-50'
-                          }`}
-                        >
-                          {option}
-                        </div>
-                      ))}
+                            }`}
+                          >
+                            {isUserSelected && (
+                              <span className="mr-2 font-bold">
+                                {isCorrectOption ? '✓' : '✗'}
+                              </span>
+                            )}
+                            {isCorrectOption && !isUserSelected && (
+                              <span className="mr-2 text-green-600">
+                                ✓
+                              </span>
+                            )}
+                            <span>{option}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </CardContent>
                 </Card>
@@ -270,7 +301,7 @@ const MockTest = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Total Points:</span>
-                  <span>{test.questions.reduce((sum, q) => sum + q.points, 0)}</span>
+                  <span>{test.totalMarks || test.questions.reduce((sum, q) => sum + q.points, 0)}</span>
                 </div>
               </div>
               <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">

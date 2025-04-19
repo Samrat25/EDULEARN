@@ -11,6 +11,9 @@ export interface Course {
   tests: string[]; // IDs of tests
   students: string[]; // IDs of enrolled students
   createdAt: number;
+  category?: string; // Course category (e.g., programming, math, science)
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  price?: number; // Course price in USD (0 for free courses)
 }
 
 export interface Lecture {
@@ -20,4 +23,7 @@ export interface Lecture {
   videoUrl: string;
   duration: number; // in minutes
   order: number;
+  likes?: number;
+  viewed?: boolean;
+  completed?: boolean;
 }

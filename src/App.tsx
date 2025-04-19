@@ -18,6 +18,10 @@ import AssignmentCreation from "./pages/teacher/AssignmentCreation";
 import TestCreation from "./pages/teacher/TestCreation";
 import { AuthProvider } from "./contexts/AuthContext";
 import TeacherCourseView from "./pages/teacher/TeacherCourseView";
+import StudentProfile from "./pages/student/StudentProfile";
+import TeacherProfile from "./pages/teacher/TeacherProfile";
+import CourseSearch from "./pages/CourseSearch";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -33,15 +37,28 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              
+              {/* Student Routes */}
               <Route path="/student/dashboard" element={<StudentDashboard />} />
-              <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
-              <Route path="/teacher/course/:id" element={<TeacherCourseView />} />
+              <Route path="/student/profile" element={<StudentProfile />} />
               <Route path="/course/:id" element={<CourseView />} />
               <Route path="/assignment/:id" element={<AssignmentView />} />
               <Route path="/mock-test/:id" element={<MockTest />} />
+              
+              {/* Teacher Routes */}
+              <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+              <Route path="/teacher/profile" element={<TeacherProfile />} />
+              <Route path="/teacher/course/:id" element={<TeacherCourseView />} />
               <Route path="/teacher/create-course" element={<CourseCreation />} />
               <Route path="/teacher/create-assignment" element={<AssignmentCreation />} />
               <Route path="/teacher/create-test" element={<TestCreation />} />
+              
+              {/* Public Routes */}
+              <Route path="/course-search" element={<CourseSearch />} />
+              <Route path="/courses" element={<CourseSearch />} />
+              <Route path="/about" element={<About />} />
+              
+              {/* 404 Route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

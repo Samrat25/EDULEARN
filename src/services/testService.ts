@@ -22,6 +22,11 @@ export const getTestById = (testId: string): Test | null => {
 export const createTest = (testData: Omit<Test, 'id' | 'createdAt'>): Test => {
   const tests = getAllTests();
   
+  // Calculate total points from questions if totalMarks not specified
+  if (!testData.totalMarks) {
+    testData.totalMarks = testData.questions.reduce((total, q) => total + q.points, 0);
+  }
+  
   const newTest: Test = {
     ...testData,
     id: Date.now().toString(),
@@ -90,13 +95,34 @@ export const submitTest = (submissionData: Omit<TestSubmission, 'id' | 'submitte
   // Calculate score
   const test = getTestById(submissionData.testId);
   let score = 0;
+  let totalPossibleScore = 0;
+  let timeTaken = 0;
+  
+  // Calculate time taken
+  if (submissionData.startedAt) {
+    timeTaken = Math.round((Date.now() - submissionData.startedAt) / 60000); // Convert to minutes
+  }
   
   if (test) {
-    submissionData.answers.forEach(answer => {
+    // Use test's totalMarks if available, otherwise calculate from questions
+    totalPossibleScore = test.totalMarks || 
+      test.questions.reduce((total, q) => total + q.points, 0);
+      
+    // Process each answer, marking correct/incorrect and assigning points
+    submissionData.answers = submissionData.answers.map(answer => {
       const question = test.questions.find(q => q.id === answer.questionId);
-      if (question && answer.selectedOptionIndex === question.correctOptionIndex) {
-        score += question.points;
+      const isCorrect = question && answer.selectedOptionIndex === question.correctOptionIndex;
+      const points = isCorrect && question ? question.points : 0;
+      
+      if (isCorrect) {
+        score += points;
       }
+      
+      return {
+        ...answer,
+        correct: isCorrect,
+        points: points
+      };
     });
   }
   
@@ -104,7 +130,9 @@ export const submitTest = (submissionData: Omit<TestSubmission, 'id' | 'submitte
     ...submissionData,
     id: Date.now().toString(),
     submittedAt: Date.now(),
-    score
+    score,
+    totalPossibleScore,
+    timeTaken
   };
   
   submissions.push(newSubmission);

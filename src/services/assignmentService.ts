@@ -86,6 +86,27 @@ export const getStudentSubmission = (assignmentId: string, studentId: string): A
 // Submit an assignment
 export const submitAssignment = (submissionData: Omit<AssignmentSubmission, 'id' | 'submittedAt'>): AssignmentSubmission => {
   const submissions = getAllSubmissions();
+  const assignment = getAssignmentById(submissionData.assignmentId);
+  
+  // Process MCQ answers if assignment exists
+  if (assignment) {
+    submissionData.answers = submissionData.answers.map(answer => {
+      const question = assignment.questions.find(q => q.id === answer.questionId);
+      
+      // For MCQ questions, check correctness
+      if (question && question.questionType === 'mcq' && answer.selectedOption) {
+        // Set answer to the selected option text for consistent display
+        return {
+          ...answer,
+          answer: answer.selectedOption,
+          type: 'mcq',
+          correctAnswer: question.correctAnswer || '',
+        };
+      }
+      
+      return answer;
+    });
+  }
   
   const newSubmission: AssignmentSubmission = {
     ...submissionData,
@@ -100,17 +121,40 @@ export const submitAssignment = (submissionData: Omit<AssignmentSubmission, 'id'
 };
 
 // Grade a submission
-export const gradeSubmission = (submissionId: string, grade: number, feedback: string): AssignmentSubmission | null => {
+export const gradeSubmission = (
+  submissionId: string, 
+  grade: number, 
+  feedback: string, 
+  answerFeedback?: { questionId: string, feedback: string, rating: number }[]
+): AssignmentSubmission | null => {
   const submissions = getAllSubmissions();
   const index = submissions.findIndex(submission => submission.id === submissionId);
   
   if (index === -1) return null;
   
+  // Update the main submission feedback and grade
   submissions[index] = { 
     ...submissions[index], 
     grade, 
     feedback 
   };
+  
+  // If per-question feedback is provided, update individual answer feedback
+  if (answerFeedback && answerFeedback.length > 0) {
+    const updatedAnswers = submissions[index].answers.map(answer => {
+      const feedback = answerFeedback.find(fb => fb.questionId === answer.questionId);
+      if (feedback) {
+        return {
+          ...answer,
+          feedback: feedback.feedback,
+          rating: feedback.rating
+        };
+      }
+      return answer;
+    });
+    
+    submissions[index].answers = updatedAnswers;
+  }
   
   localStorage.setItem('assignmentSubmissions', JSON.stringify(submissions));
   
