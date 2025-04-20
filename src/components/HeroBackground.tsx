@@ -275,7 +275,7 @@ const HeroBackground = () => {
   // For low performance devices, show a simplified version
   if (isLowPerformance) {
     return (
-      <div className="absolute inset-0 z-0 opacity-80">
+      <div className="relative w-full h-full z-0">
         <Canvas dpr={1} camera={{ position: [0, 0, 10], fov: 50 }}>
           <color attach="background" args={['transparent']} />
           <fog attach="fog" args={['#000', 10, 25]} />
@@ -283,13 +283,14 @@ const HeroBackground = () => {
           <Particles count={20} color="#8b5cf6" />
           <Preload all />
         </Canvas>
+        <div className="absolute inset-0 z-[1] bg-gradient-to-t from-background/90 via-background/50 to-transparent"></div>
       </div>
     );
   }
   
   // Standard version for normal devices
   return (
-    <div className="absolute inset-0 z-0 opacity-80">
+    <div className="relative w-full h-full z-0">
       <Canvas dpr={1} camera={{ position: [0, 0, 10], fov: 50 }}>
         <color attach="background" args={['transparent']} />
         <fog attach="fog" args={['#000', 10, 25]} />
@@ -299,6 +300,7 @@ const HeroBackground = () => {
         <Starfield count={100} />
         <Preload all />
       </Canvas>
+      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-background/90 via-background/50 to-transparent"></div>
     </div>
   );
 };

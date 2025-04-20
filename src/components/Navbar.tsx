@@ -6,15 +6,27 @@ import NotesGenerator from './NotesGenerator';
 import MindMapGenerator from './MindMapGenerator';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut, BookOpen, Home, Info, Search, FileText, Network, MessageCircle } from 'lucide-react';
-import { useState } from 'react';
+import { User, LogOut, BookOpen, Home, Info, Search, FileText, Network, MessageCircle, Menu, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 export function Navbar() {
   const { currentUser, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [showNotesGenerator, setShowNotesGenerator] = useState(false);
   const [showMindMapGenerator, setShowMindMapGenerator] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -30,14 +42,15 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
+    <header className={`sticky top-0 z-40 w-full border-b transition-all duration-300 ${isScrolled ? 'bg-background/95 backdrop-blur-sm shadow-sm' : 'bg-background'}`}>
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center space-x-2">
             <img src="/Logo.png" alt="EduLearn Logo" className="h-8 w-8" />
             <span className="text-xl font-bold text-primary">EduLearn</span>
           </Link>
-          <nav className="hidden gap-6 md:flex">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex gap-6">
             <Link
               to="/"
               className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1"
@@ -64,86 +77,206 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           <ThemeToggle />
           
-          {/* AI Tools as Dialog Buttons */}
-          <Dialog open={showNotesGenerator} onOpenChange={setShowNotesGenerator}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-full" title="Notes Generator">
-                <FileText className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <NotesGenerator />
-            </DialogContent>
-          </Dialog>
+          {/* AI Tools as Dialog Buttons - Hide on mobile */}
+          <div className="hidden md:flex gap-2">
+            <Dialog open={showNotesGenerator} onOpenChange={setShowNotesGenerator}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="icon" className="rounded-full" title="Notes Generator">
+                  <FileText className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <NotesGenerator />
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog open={showMindMapGenerator} onOpenChange={setShowMindMapGenerator}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="icon" className="rounded-full" title="Knowledge Map">
+                  <Network className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                <MindMapGenerator />
+              </DialogContent>
+            </Dialog>
+          </div>
           
-          <Dialog open={showMindMapGenerator} onOpenChange={setShowMindMapGenerator}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-full" title="Knowledge Map">
-                <Network className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-              <MindMapGenerator />
-            </DialogContent>
-          </Dialog>
-          
-          {isAuthenticated ? (
-            <div className="flex items-center gap-4">
-              <Link
-                to={getDashboardPath()}
-                className="text-sm font-medium transition-colors hover:text-primary"
-              >
-                <Button>Dashboard</Button>
-              </Link>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger className="focus:outline-none">
-                  <Avatar className="h-10 w-10 border-2 border-primary hover:border-primary/80 transition-colors cursor-pointer object-cover overflow-hidden">
-                    <AvatarImage 
-                      src={currentUser?.profilePicture || ''} 
-                      alt={currentUser?.name || ''}
-                      className="object-cover aspect-square"
-                    />
-                    <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                      {currentUser?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
+          {/* Desktop Authentication */}
+          <div className="hidden md:flex items-center gap-4">
+            {isAuthenticated ? (
+              <div className="flex items-center gap-4">
+                <Link
+                  to={getDashboardPath()}
+                  className="text-sm font-medium transition-colors hover:text-primary"
+                >
+                  <Button>Dashboard</Button>
+                </Link>
                 
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span>{currentUser?.name}</span>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <Link to={`/${currentUser?.role}/profile`}>
-                    <DropdownMenuItem className="cursor-pointer">
-                      Profile
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="focus:outline-none">
+                    <Avatar className="h-10 w-10 border-2 border-primary hover:border-primary/80 transition-colors cursor-pointer object-cover overflow-hidden">
+                      <AvatarImage 
+                        src={currentUser?.profilePicture || ''} 
+                        alt={currentUser?.name || ''}
+                        className="object-cover aspect-square"
+                      />
+                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                        {currentUser?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span>{currentUser?.name}</span>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <Link to={`/${currentUser?.role}/profile`}>
+                      <DropdownMenuItem className="cursor-pointer">
+                        Profile
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link to={getChatPath()}>
+                      <DropdownMenuItem className="cursor-pointer">
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        <span>Messages</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      <span>Logout</span>
                     </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="outline">Log in</Button>
+                </Link>
+                <Link to="/register">
+                  <Button>Register</Button>
+                </Link>
+              </>
+            )}
+          </div>
+          
+          {/* Mobile Menu Button */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+              <SheetHeader>
+                <SheetTitle>
+                  <Link to="/" className="flex items-center space-x-2">
+                    <img src="/Logo.png" alt="EduLearn Logo" className="h-8 w-8" />
+                    <span className="text-xl font-bold text-primary">EduLearn</span>
                   </Link>
-                  <Link to={getChatPath()}>
-                    <DropdownMenuItem className="cursor-pointer">
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      <span>Messages</span>
-                    </DropdownMenuItem>
+                </SheetTitle>
+              </SheetHeader>
+              <div className="py-4 flex flex-col gap-4">
+                <nav className="flex flex-col gap-2">
+                  <Link
+                    to="/"
+                    className="flex items-center gap-2 p-2 rounded-md hover:bg-primary/10 transition-colors"
+                  >
+                    <Home className="h-5 w-5" />
+                    <span>Home</span>
                   </Link>
-                  <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    <span>Logout</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ) : (
-            <>
-              <Link to="/login">
-                <Button variant="outline">Log in</Button>
-              </Link>
-              <Link to="/register">
-                <Button>Register</Button>
-              </Link>
-            </>
-          )}
+                  <Link
+                    to="/courses"
+                    className="flex items-center gap-2 p-2 rounded-md hover:bg-primary/10 transition-colors"
+                  >
+                    <BookOpen className="h-5 w-5" />
+                    <span>Courses</span>
+                  </Link>
+                  <Link
+                    to="/about"
+                    className="flex items-center gap-2 p-2 rounded-md hover:bg-primary/10 transition-colors"
+                  >
+                    <Info className="h-5 w-5" />
+                    <span>About</span>
+                  </Link>
+                </nav>
+                
+                <div className="border-t pt-4 mt-2">
+                  <p className="text-sm font-medium mb-2">AI Tools</p>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      className="justify-start"
+                      onClick={() => {
+                        setShowNotesGenerator(true);
+                      }}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      <span>Notes Generator</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="justify-start"
+                      onClick={() => {
+                        setShowMindMapGenerator(true);
+                      }}
+                    >
+                      <Network className="h-4 w-4 mr-2" />
+                      <span>Knowledge Map</span>
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="border-t pt-4 mt-auto">
+                  {isAuthenticated ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center mb-2">
+                        <Avatar className="h-10 w-10 mr-3">
+                          <AvatarImage 
+                            src={currentUser?.profilePicture || ''} 
+                            alt={currentUser?.name || ''}
+                          />
+                          <AvatarFallback>{currentUser?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{currentUser?.name}</p>
+                          <p className="text-xs text-muted-foreground capitalize">{currentUser?.role}</p>
+                        </div>
+                      </div>
+                      <Link to={getDashboardPath()}>
+                        <Button className="w-full">Dashboard</Button>
+                      </Link>
+                      <Link to={`/${currentUser?.role}/profile`}>
+                        <Button variant="outline" className="w-full">Profile</Button>
+                      </Link>
+                      <Link to={getChatPath()}>
+                        <Button variant="outline" className="w-full flex items-center">
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          <span>Messages</span>
+                        </Button>
+                      </Link>
+                      <Button variant="destructive" className="w-full" onClick={handleLogout}>
+                        <LogOut className="h-4 w-4 mr-2" />
+                        <span>Logout</span>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <Link to="/login" className="w-full">
+                        <Button variant="outline" className="w-full">Log in</Button>
+                      </Link>
+                      <Link to="/register" className="w-full">
+                        <Button className="w-full">Register</Button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

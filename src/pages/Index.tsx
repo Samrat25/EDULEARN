@@ -3,13 +3,27 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { getAllCourses } from '@/services/courseService';
 import { CourseCard } from '@/components/CourseCard';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Course } from '@/types/course';
 import HeroBackground from '@/components/HeroBackground';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 
 const Index = () => {
   const [featuredCourses, setFeaturedCourses] = useState<Course[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  
+  const featuredRef = useRef<HTMLDivElement>(null);
+  const featuredInView = useInView(featuredRef, { once: true, amount: 0.2 });
+  
+  const whyChooseRef = useRef<HTMLDivElement>(null);
+  const whyChooseInView = useInView(whyChooseRef, { once: true, amount: 0.2 });
+  
+  const testimonialRef = useRef<HTMLDivElement>(null);
+  const testimonialInView = useInView(testimonialRef, { once: true, amount: 0.2 });
+  
+  const { scrollYProgress } = useScroll();
+  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.9]);
 
   useEffect(() => {
     // In a real app, you'd have an API call for featured courses
@@ -18,20 +32,59 @@ const Index = () => {
     setIsMounted(true); // Mark component as mounted
   }, []);
 
+  const featuredVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { y: 50, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
+
+  const featureItemVariants = {
+    hidden: { x: -30, opacity: 0 },
+    visible: { 
+      x: 0, 
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
+
   return (
     <PageLayout>
       {/* Hero Section with optimized background */}
       <section className="relative dark-gradient-bg py-20 md:py-28 overflow-hidden min-h-[600px] flex items-center">
         {/* Keep only the main 3D background for better performance */}
-        <HeroBackground />
+        <motion.div
+          style={{ opacity, scale }}
+          className="absolute inset-0 z-0"
+        >
+          <HeroBackground />
+        </motion.div>
         
         {/* Animated overlays - kept simple */}
         <div className="hero-gradient animate-pulse-slow"></div>
-        <div className="absolute inset-0 bg-black/20 z-[1]"></div>
+        <div className="absolute inset-0 bg-black/40 z-[1]"></div>
         
-        {/* Light streaks effect - reduced to just 3 */}
+        {/* Light streaks effect */}
         <div className="absolute inset-0 z-[1] overflow-hidden opacity-10">
-          {[...Array(3)].map((_, i) => (
+          {[...Array(5)].map((_, i) => (
             <div 
               key={i}
               className="absolute h-px bg-white animate-float" 
@@ -51,17 +104,45 @@ const Index = () => {
         {/* Content overlay */}
         <div className="container px-4 md:px-6 relative z-10">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2 items-center">
-            <div className="flex flex-col justify-center space-y-6">
+            <motion.div 
+              className="flex flex-col justify-center space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+            >
               <div className="space-y-4">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-white drop-shadow-md opacity-0 animate-slide-up">
-                  <span className="animate-text-shimmer">Learn, Connect, Thrive</span>
-                </h1>
-                <p className="max-w-[600px] text-white/90 md:text-xl drop-shadow opacity-0 animate-slide-up delay-200">
+                <motion.h1 
+                  className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl drop-shadow-md"
+                  initial={{ y: 40, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                >
+                  <motion.span
+                    className="text-white block"
+                    animate={{ 
+                      textShadow: ["0 0 4px #8b5cf6", "0 0 15px #8b5cf6", "0 0 4px #8b5cf6"]
+                    }}
+                    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                  >
+                    Learn, Connect, Thrive
+                  </motion.span>
+                </motion.h1>
+                <motion.p 
+                  className="max-w-[600px] text-white/90 md:text-xl drop-shadow"
+                  initial={{ y: 40, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                >
                   Our platform connects students with teachers for a personalized learning experience.
                   Enroll in courses, complete assignments, and test your knowledge.
-                </p>
+                </motion.p>
               </div>
-              <div className="flex flex-col gap-3 min-[400px]:flex-row opacity-0 animate-slide-up delay-400">
+              <motion.div 
+                className="flex flex-col gap-3 min-[400px]:flex-row" 
+                initial={{ y: 40, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+              >
                 <Link to="/register">
                   <Button 
                     size="lg" 
@@ -79,10 +160,23 @@ const Index = () => {
                     Browse Courses
                   </Button>
                 </Link>
-              </div>
-            </div>
-            <div className="flex items-center justify-center opacity-0 animate-slide-up delay-300">
-              <div className="bg-gray-800/30 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-primary/20 max-w-md hover:bg-gray-800/50 transition-all duration-500 transform hover:scale-105 hover:shadow-primary/20 hover:shadow-2xl animate-float">
+              </motion.div>
+            </motion.div>
+            <motion.div 
+              className="flex items-center justify-center"
+              initial={{ y: 40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              <motion.div 
+                className="bg-gray-800/30 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-primary/20 max-w-md hover:bg-gray-800/50 transition-all duration-500 transform hover:shadow-primary/20 hover:shadow-2xl"
+                whileHover={{ scale: 1.05 }}
+                animate={{ y: [0, -10, 0] }}
+                transition={{ 
+                  y: { repeat: Infinity, duration: 6, ease: "easeInOut" },
+                  duration: 0.3
+                }}
+              >
                 <img 
                   src="/Logo.png" 
                   alt="EduLearn Logo" 
@@ -90,16 +184,21 @@ const Index = () => {
                   width={400}
                   height={400}
                 />
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Featured Courses */}
-      <section className="py-12 md:py-16">
+      <section ref={featuredRef} className="py-12 md:py-16">
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+          <motion.div 
+            className="flex flex-col items-center justify-center space-y-4 text-center"
+            initial={{ opacity: 0, y: 40 }}
+            animate={featuredInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+            transition={{ duration: 0.5 }}
+          >
             <div className="space-y-2">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                 Featured Courses
@@ -108,18 +207,28 @@ const Index = () => {
                 Discover our most popular courses and start learning today.
               </p>
             </div>
-          </div>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          </motion.div>
+          <motion.div 
+            className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            variants={featuredVariants}
+            initial="hidden"
+            animate={featuredInView ? "visible" : "hidden"}
+          >
             {featuredCourses.length > 0 ? (
-              featuredCourses.map((course) => (
-                <CourseCard key={course.id} course={course} />
+              featuredCourses.map((course, index) => (
+                <motion.div key={course.id} variants={cardVariants} custom={index}>
+                  <CourseCard course={course} />
+                </motion.div>
               ))
             ) : (
-              <div className="col-span-full text-center">
+              <motion.div 
+                className="col-span-full text-center"
+                variants={cardVariants}
+              >
                 <p className="text-lg text-muted-foreground">No courses available yet.</p>
                 {/* Demo data creation button - only for development */}
                 <Button 
-                  className="mt-4"
+                  className="mt-4 animate-bounce-slow"
                   onClick={() => {
                     // Create demo data
                     const demoCourses = [
@@ -178,123 +287,197 @@ const Index = () => {
                 >
                   Load Demo Courses
                 </Button>
-              </div>
+              </motion.div>
             )}
-          </div>
-          <div className="mt-12 flex justify-center">
+          </motion.div>
+          <motion.div 
+            className="mt-12 flex justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={featuredInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
             <Link to="/courses">
-              <Button size="lg" variant="outline">View All Courses</Button>
+              <Button size="lg" variant="outline" className="animate-scale-pulse">View All Courses</Button>
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="bg-primary/10 py-12 md:py-16">
+      <section ref={whyChooseRef} className="bg-primary/10 py-12 md:py-16">
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+          <motion.div 
+            className="flex flex-col items-center justify-center space-y-4 text-center"
+            initial={{ opacity: 0, y: 40 }}
+            animate={whyChooseInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+            transition={{ duration: 0.5 }}
+          >
             <div className="space-y-2">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                 Why Choose Us
               </h2>
               <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                Our platform offers the best learning experience for students and teachers.
+                Our platform offers unique features to enhance your learning experience
               </p>
             </div>
-          </div>
+          </motion.div>
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="flex flex-col items-center space-y-2 rounded-lg border bg-card p-6 shadow-sm">
-              <div className="rounded-full bg-primary/10 p-4">
-                <svg
-                  className="h-6 w-6 text-primary"
-                  fill="none"
-                  height="24"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M18 6H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h13l4-3.5L18 6Z" />
-                  <path d="M12 13v8" />
-                  <path d="M5 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold">Interactive Learning</h3>
-              <p className="text-center text-muted-foreground">
-                Engage with video lectures, assignments, and interactive tests.
-              </p>
-            </div>
-            <div className="flex flex-col items-center space-y-2 rounded-lg border bg-card p-6 shadow-sm">
-              <div className="rounded-full bg-primary/10 p-4">
-                <svg
-                  className="h-6 w-6 text-primary"
-                  fill="none"
-                  height="24"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold">Expert Teachers</h3>
-              <p className="text-center text-muted-foreground">
-                Learn from experienced educators in various fields.
-              </p>
-            </div>
-            <div className="flex flex-col items-center space-y-2 rounded-lg border bg-card p-6 shadow-sm">
-              <div className="rounded-full bg-primary/10 p-4">
-                <svg
-                  className="h-6 w-6 text-primary"
-                  fill="none"
-                  height="24"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold">Secure Platform</h3>
-              <p className="text-center text-muted-foreground">
-                Your data is safe and secure on our platform.
-              </p>
-            </div>
+            {[
+              {
+                title: "Interactive Learning",
+                description: "Engage with course material through interactive exercises and quizzes",
+                icon: "🧠",
+              },
+              {
+                title: "Expert Teachers",
+                description: "Learn from industry professionals and academic experts",
+                icon: "👨‍🏫",
+              },
+              {
+                title: "AI-Powered Tools",
+                description: "Generate notes and mind maps automatically from course content",
+                icon: "🤖",
+              },
+              {
+                title: "Flexible Schedule",
+                description: "Study at your own pace with on-demand video lectures",
+                icon: "⏰",
+              },
+              {
+                title: "Community Support",
+                description: "Connect with peers and instructors through discussion forums",
+                icon: "👥",
+              },
+              {
+                title: "Verified Certificates",
+                description: "Earn certificates to showcase your skills and knowledge",
+                icon: "🎓",
+              },
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                className="flex flex-col items-center text-center p-6 bg-card rounded-xl shadow-sm border border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-md"
+                variants={featureItemVariants}
+                initial="hidden"
+                animate={whyChooseInView ? "visible" : "hidden"}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+              >
+                <div className="text-4xl mb-4 animate-bounce-slow" style={{ animationDelay: `${index * 0.2}s` }}>
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                <p className="text-muted-foreground">{feature.description}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-12 md:py-16">
+      {/* Testimonials */}
+      <section ref={testimonialRef} className="py-12 md:py-16">
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+          <motion.div 
+            className="flex flex-col items-center justify-center space-y-4 text-center"
+            initial={{ opacity: 0, y: 40 }}
+            animate={testimonialInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+            transition={{ duration: 0.5 }}
+          >
             <div className="space-y-2">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                Ready to Start Learning?
+                What Our Students Say
               </h2>
-              <p className="max-w-[600px] text-gray-500 md:text-xl">
-                Join thousands of students who are already learning on our platform.
+              <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                Hear from students who have transformed their learning experience with us
               </p>
             </div>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row">
+          </motion.div>
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                name: "Sarah Johnson",
+                role: "Computer Science Student",
+                content: "The AI-powered learning tools helped me understand complex topics that I was struggling with before. The notes generator is a game-changer!",
+                avatar: "https://i.pravatar.cc/150?img=1",
+              },
+              {
+                name: "David Chen",
+                role: "Data Science Professional",
+                content: "The quality of courses offered is exceptional. The instructors are knowledgeable and responsive to questions.",
+                avatar: "https://i.pravatar.cc/150?img=8",
+              },
+              {
+                name: "Maria Rodriguez",
+                role: "Digital Marketing Specialist",
+                content: "I've taken three courses so far and each one has helped me develop marketable skills that I've applied in my career.",
+                avatar: "https://i.pravatar.cc/150?img=5",
+              },
+            ].map((testimonial, index) => (
+              <motion.div 
+                key={index}
+                className="p-6 bg-card rounded-xl shadow-sm border border-primary/10"
+                initial={{ opacity: 0, y: 50 }}
+                animate={testimonialInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                transition={{ delay: index * 0.2 }}
+                whileHover={{ scale: 1.03, boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}
+              >
+                <div className="flex items-center space-x-4 mb-4">
+                  <img 
+                    src={testimonial.avatar}
+                    alt={testimonial.name}
+                    className="rounded-full h-12 w-12 object-cover border-2 border-primary"
+                  />
+                  <div>
+                    <h3 className="font-bold">{testimonial.name}</h3>
+                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                  </div>
+                </div>
+                <p className="italic text-muted-foreground">"{testimonial.content}"</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action */}
+      <section className="py-12 md:py-16 bg-primary/5">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center text-center space-y-4 md:space-y-8">
+            <motion.h2 
+              className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl max-w-[800px]"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              Ready to Start Your Learning Journey?
+            </motion.h2>
+            <motion.p 
+              className="text-muted-foreground md:text-xl max-w-[600px]"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              Join thousands of students already learning on our platform
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <Link to="/register">
-                <Button size="lg">Create an Account</Button>
+                <Button 
+                  size="lg" 
+                  className="mt-4 bg-primary text-white hover:bg-primary/90 animate-glow"
+                >
+                  Create Your Free Account
+                </Button>
               </Link>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
