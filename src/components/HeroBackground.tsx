@@ -303,4 +303,4 @@ const HeroBackground = () => {
   );
 };
 
-export default HeroBackground; 
+export default HeroBackground;

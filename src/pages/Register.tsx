@@ -9,6 +9,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { PageLayout } from '@/components/PageLayout';
+import HeroBackground from '@/components/HeroBackground';
+import HeroAnimatedBackground from '@/components/HeroAnimatedBackground';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -77,8 +79,14 @@ const Register = () => {
 
   return (
     <PageLayout>
-      <div className="container flex h-screen items-center justify-center px-4 py-8">
-        <Card className="w-full max-w-md">
+      <div className="relative container flex h-screen items-center justify-center px-4 py-8">
+        {/* Background Effects */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <HeroBackground />
+          <HeroAnimatedBackground />
+        </div>
+        
+        <Card className="w-full max-w-md relative z-10 bg-background/80 backdrop-blur-md border-primary/20">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
             <CardDescription>

@@ -41,12 +41,12 @@ export function CourseCard({ course, isEnrolled = false, onEnroll }: CourseCardP
             <Button className="w-full">Continue Learning</Button>
           </Link>
         ) : (
-          <Button 
+          <Link to="/login"><Button 
             className="w-full" 
             onClick={() => onEnroll && onEnroll(course.id)}
           >
             Enroll Now
-          </Button>
+          </Button></Link>
         )}
       </CardFooter>
     </Card>

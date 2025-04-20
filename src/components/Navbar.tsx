@@ -6,15 +6,30 @@ import NotesGenerator from './NotesGenerator';
 import MindMapGenerator from './MindMapGenerator';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut, BookOpen, Home, Info, Search, FileText, Network, MessageCircle } from 'lucide-react';
-import { useState } from 'react';
+import { User, LogOut, BookOpen, Home, Info, Search, FileText, Network, MessageCircle, Menu, X, ChevronDown, Code, Calculator, GraduationCap, Atom, Lightbulb, Globe, PenTool } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function Navbar() {
   const { currentUser, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [showNotesGenerator, setShowNotesGenerator] = useState(false);
   const [showMindMapGenerator, setShowMindMapGenerator] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [courses, setCourses] = useState([]);
+  
+  // Fetch courses for the dropdown
+  useEffect(() => {
+    try {
+      const allCourses = JSON.parse(localStorage.getItem('courses') || '[]');
+      setCourses(allCourses);
+    } catch (error) {
+      console.error('Error loading courses:', error);
+    }
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -28,9 +43,19 @@ export function Navbar() {
   const getChatPath = () => {
     return currentUser?.role === 'student' ? '/student/chat' : '/teacher/chat';
   };
+  
+  // Add scroll detection for navbar styling
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
+    <header className={`sticky top-0 z-40 w-full border-b transition-all duration-200 ${isScrolled ? 'bg-background/80 backdrop-blur-md shadow-sm' : 'bg-background'}`}>
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center space-x-2">
@@ -45,13 +70,68 @@ export function Navbar() {
               <Home className="h-4 w-4" />
               <span>Home</span>
             </Link>
-            <Link
-              to="/courses"
-              className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1"
-            >
-              <BookOpen className="h-4 w-4" />
-              <span>Courses</span>
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1 focus:outline-none">
+                <BookOpen className="h-4 w-4" />
+                <span>Courses</span>
+                <ChevronDown className="h-4 w-4 ml-1" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <Link to="/courses">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    <span>All Courses</span>
+                  </DropdownMenuItem>
+                </Link>
+                
+                <DropdownMenuSeparator />
+                
+                {/* Course Categories */}
+                <Link to="/courses?category=programming">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Code className="h-4 w-4 mr-2" />
+                    <span>Programming</span>
+                  </DropdownMenuItem>
+                </Link>
+                
+                <Link to="/courses?category=mathematics">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Calculator className="h-4 w-4 mr-2" />
+                    <span>Mathematics</span>
+                  </DropdownMenuItem>
+                </Link>
+                
+                <Link to="/courses?category=science">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Atom className="h-4 w-4 mr-2" />
+                    <span>Science</span>
+                  </DropdownMenuItem>
+                </Link>
+                
+                <Link to="/courses?category=language">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Globe className="h-4 w-4 mr-2" />
+                    <span>Languages</span>
+                  </DropdownMenuItem>
+                </Link>
+                
+                <Link to="/courses?category=arts">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <PenTool className="h-4 w-4 mr-2" />
+                    <span>Arts & Design</span>
+                  </DropdownMenuItem>
+                </Link>
+                
+                <DropdownMenuSeparator />
+                
+                
+                {courses.length === 0 && (
+                  <DropdownMenuItem disabled>
+                    <span className="text-muted-foreground">No courses available</span>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Link
               to="/about"
               className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1"
@@ -64,34 +144,40 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           <ThemeToggle />
           
-          {/* AI Tools as Dialog Buttons */}
-          <Dialog open={showNotesGenerator} onOpenChange={setShowNotesGenerator}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-full" title="Notes Generator">
-                <FileText className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <NotesGenerator />
-            </DialogContent>
-          </Dialog>
+          {/* AI Tools as Dialog Buttons - Hide on mobile */}
+          <div className="hidden md:block">
+            <Dialog open={showNotesGenerator} onOpenChange={setShowNotesGenerator}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-1">
+                  <FileText className="h-4 w-4" />
+                  <span>Notes Generator</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <NotesGenerator />
+              </DialogContent>
+            </Dialog>
+          </div>
           
-          <Dialog open={showMindMapGenerator} onOpenChange={setShowMindMapGenerator}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-full" title="Knowledge Map">
-                <Network className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-              <MindMapGenerator />
-            </DialogContent>
-          </Dialog>
+          <div className="hidden md:block">
+            <Dialog open={showMindMapGenerator} onOpenChange={setShowMindMapGenerator}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-1">
+                  <Network className="h-4 w-4" />
+                  <span>MindMap Generator</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                <MindMapGenerator />
+              </DialogContent>
+            </Dialog>
+          </div>
           
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
               <Link
                 to={getDashboardPath()}
-                className="text-sm font-medium transition-colors hover:text-primary"
+                className="text-sm font-medium transition-colors hover:text-primary hidden md:block"
               >
                 <Button>Dashboard</Button>
               </Link>
@@ -135,15 +221,162 @@ export function Navbar() {
               </DropdownMenu>
             </div>
           ) : (
-            <>
+            <div className="hidden md:flex items-center gap-4">
               <Link to="/login">
                 <Button variant="outline">Log in</Button>
               </Link>
               <Link to="/register">
                 <Button>Register</Button>
               </Link>
-            </>
+            </div>
           )}
+          
+          {/* Mobile menu button */}
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72 sm:w-80">
+              <div className="flex items-center gap-2 mb-6">
+                <img src="/Logo.png" alt="EduLearn Logo" className="h-8 w-8" />
+                <span className="text-xl font-bold text-primary">EduLearn</span>
+              </div>
+              
+              <ScrollArea className="h-[calc(100vh-8rem)]">
+                <div className="flex flex-col gap-4 py-4">
+                  <Link 
+                    to="/" 
+                    className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-accent"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Home className="h-5 w-5" />
+                    <span>Home</span>
+                  </Link>
+                  
+                  <div className="space-y-2">
+                    <Link 
+                      to="/courses" 
+                      className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <BookOpen className="h-5 w-5" />
+                      <span>All Courses</span>
+                    </Link>
+                    
+                    {/* Categories in Mobile Menu */}
+                    <div className="pl-9 flex flex-col space-y-2">
+                      <Link 
+                        to="/courses?category=programming" 
+                        className="flex items-center gap-2 py-1 text-sm text-muted-foreground hover:text-foreground"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Code className="h-4 w-4" />
+                        <span>Programming</span>
+                      </Link>
+                      <Link 
+                        to="/courses?category=mathematics" 
+                        className="flex items-center gap-2 py-1 text-sm text-muted-foreground hover:text-foreground"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Calculator className="h-4 w-4" />
+                        <span>Mathematics</span>
+                      </Link>
+                      <Link 
+                        to="/courses?category=science" 
+                        className="flex items-center gap-2 py-1 text-sm text-muted-foreground hover:text-foreground"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Atom className="h-4 w-4" />
+                        <span>Science</span>
+                      </Link>
+                      <Link 
+                        to="/courses?category=language" 
+                        className="flex items-center gap-2 py-1 text-sm text-muted-foreground hover:text-foreground"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Globe className="h-4 w-4" />
+                        <span>Languages</span>
+                      </Link>
+                      <Link 
+                        to="/courses?category=arts" 
+                        className="flex items-center gap-2 py-1 text-sm text-muted-foreground hover:text-foreground"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <PenTool className="h-4 w-4" />
+                        <span>Arts & Design</span>
+                      </Link>
+                    </div>
+                  </div>
+                  
+                  <Link 
+                    to="/about" 
+                    className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-accent"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Info className="h-5 w-5" />
+                    <span>About</span>
+                  </Link>
+                  
+                  {isAuthenticated && (
+                    <Link 
+                      to={getDashboardPath()} 
+                      className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <User className="h-5 w-5" />
+                      <span>Dashboard</span>
+                    </Link>
+                  )}
+                  
+                  {/* Mobile AI Tools */}
+                  <Button 
+                    variant="ghost" 
+                    className="flex items-center justify-start gap-2 px-2 py-2 rounded-md hover:bg-accent"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setShowNotesGenerator(true);
+                    }}
+                  >
+                    <FileText className="h-5 w-5" />
+                    <span>Notes Generator</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="flex items-center justify-start gap-2 px-2 py-2 rounded-md hover:bg-accent"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setShowMindMapGenerator(true);
+                    }}
+                  >
+                    <Network className="h-5 w-5" />
+                    <span>MindMap Generator</span>
+                  </Button>
+                  
+                  {!isAuthenticated && (
+                    <div className="flex flex-col gap-2 mt-4">
+                      <Link 
+                        to="/login" 
+                        className="w-full"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Button variant="outline" className="w-full">Log in</Button>
+                      </Link>
+                      <Link 
+                        to="/register" 
+                        className="w-full"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Button className="w-full">Register</Button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
