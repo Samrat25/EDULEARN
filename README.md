@@ -34,22 +34,13 @@ A sleek and user-friendly interface that makes learning and teaching enjoyable.
 **Frontend:**  
 - ⚛️ React.js  
 - 💨 Tailwind CSS  
-- 🌐 Next.js
+- 🌐 Vite
 
 **Backend:**  
 - 🟨 Node.js  
-- 🌿 Express.js  
-- 🍃 MongoDB
-
-**Authentication & Database:**  
-- 🔥 Firebase (for auth and storage)
-
 **AI & Features:**  
 - 🧠 OpenAI API (for generating notes and mind maps)  
 - 🗺 Custom Mind Mapping Logic
-
-**Others:**  
-- 🎥 Zego Cloud (for future integration of video calling & live classes)  
 - 🔍 REST APIs for dynamic content handling
 
 ---
