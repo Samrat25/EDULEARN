@@ -110,7 +110,7 @@ const About = () => {
               <Card>
                 <CardHeader className="text-center">
                   <div className="mx-auto bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-2xl font-bold text-primary">JS</span>
+                    <span className="text-2xl font-bold text-primary">SN</span>
                   </div>
                   <CardTitle>Samrat Natta</CardTitle>
                   <CardDescription>Founder & CEO</CardDescription>
@@ -122,7 +122,7 @@ const About = () => {
               <Card>
                 <CardHeader className="text-center">
                   <div className="mx-auto bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-2xl font-bold text-primary">AP</span>
+                    <span className="text-2xl font-bold text-primary">SD</span>
                   </div>
                   <CardTitle>Soumadeep Dey</CardTitle>
                   <CardDescription>Head of Education</CardDescription>
@@ -137,6 +137,18 @@ const About = () => {
                     <span className="text-2xl font-bold text-primary">MR</span>
                   </div>
                   <CardTitle>Maniratna Roy</CardTitle>
+                  <CardDescription>CTO</CardDescription>
+                </CardHeader>
+                <CardContent className="text-center text-sm text-muted-foreground">
+                  Tech innovator with expertise in building scalable platforms for educational content delivery.
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="text-center">
+                  <div className="mx-auto bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-primary">NJ</span>
+                  </div>
+                  <CardTitle>Nilarpan Jana</CardTitle>
                   <CardDescription>CTO</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center text-sm text-muted-foreground">
