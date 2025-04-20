@@ -250,7 +250,7 @@ const MockTest = () => {
                                 ✓
                               </span>
                             )}
-                            <span>{option}</span>
+                            <span className="text-gray-900">{option}</span>
                           </div>
                         );
                       })}
