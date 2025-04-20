@@ -20,7 +20,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import TeacherCourseView from "./pages/teacher/TeacherCourseView";
 import StudentProfile from "./pages/student/StudentProfile";
 import TeacherProfile from "./pages/teacher/TeacherProfile";
-import CourseSearch from "./pages/CourseSearch";
+import Courses from "./pages/Courses";
 import About from "./pages/About";
 import StudentChatPage from "./pages/student/ChatPage";
 import TeacherChatPage from "./pages/teacher/ChatPage";
@@ -58,8 +58,8 @@ const App = () => (
               <Route path="/teacher/create-test" element={<TestCreation />} />
               
               {/* Public Routes */}
-              <Route path="/course-search" element={<CourseSearch />} />
-              <Route path="/courses" element={<CourseSearch />} />
+              <Route path="/course-search" element={<Courses />} />
+              <Route path="/courses" element={<Courses />} />
               <Route path="/about" element={<About />} />
               
               {/* 404 Route */}
