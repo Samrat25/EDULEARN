@@ -9,6 +9,7 @@ import ForceGraph2D from "react-force-graph-2d";
 import * as htmlToImage from "html-to-image";
 import { saveAs } from "file-saver";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 export default function MindmapGenerator() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,6 +20,12 @@ export default function MindmapGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const graphRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const { theme } = useTheme();
+  
+  // Determine arrow color based on theme
+  const getArrowColor = () => {
+    return theme === 'dark' ? "#ffffff" : "#000000";
+  };
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -241,8 +248,10 @@ export default function MindmapGenerator() {
                 linkDirectionalArrowLength={4}
                 linkDirectionalArrowRelPos={1}
                 linkWidth={(link: any) => (link.value || 1) * 1.5}
+                linkColor={() => getArrowColor()}
                 linkDirectionalParticles={2}
                 linkDirectionalParticleSpeed={0.005}
+                linkDirectionalParticleColor={() => getArrowColor()}
                 cooldownTime={3000}
                 d3AlphaDecay={0.02}
                 d3VelocityDecay={0.1}

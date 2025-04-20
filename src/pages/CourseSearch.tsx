@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PageLayout } from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,8 @@ const CourseSearch = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDemoCourses, setShowDemoCourses] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   
   // Filters
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -80,6 +82,20 @@ const CourseSearch = () => {
     setFilteredCourses(result);
   }, [courses, searchQuery, selectedCategory, selectedDifficulty, durationRange, showOnlyFree]);
   
+  // Close demo courses when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowDemoCourses(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
   const resetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('all');
@@ -109,14 +125,81 @@ const CourseSearch = () => {
         </div>
         
         <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="relative flex-1">
+          <div className="relative flex-1" ref={searchContainerRef}>
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search for courses..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
+              onFocus={() => setShowDemoCourses(true)}
             />
+            
+            {/* Demo Courses */}
+            {showDemoCourses && (
+              <div className="absolute z-10 mt-1 w-full bg-card border border-border rounded-md shadow-md">
+                <div className="p-3 border-b border-border">
+                  <h3 className="text-sm font-medium mb-2">Popular Courses</h3>
+                  <div className="grid grid-cols-1 gap-2">
+                    <Link 
+                      to="/course/demo1" 
+                      className="flex items-center p-2 rounded-md hover:bg-accent"
+                      onMouseDown={(e) => e.preventDefault()} // Prevent onBlur from firing
+                    >
+                      <div className="w-10 h-10 bg-primary/10 rounded-md flex items-center justify-center mr-3">
+                        <BookOpen className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">Introduction to Web Development</h4>
+                        <p className="text-xs text-muted-foreground">Learn HTML, CSS, JavaScript basics</p>
+                      </div>
+                    </Link>
+                    
+                    <Link 
+                      to="/course/demo2" 
+                      className="flex items-center p-2 rounded-md hover:bg-accent"
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
+                      <div className="w-10 h-10 bg-primary/10 rounded-md flex items-center justify-center mr-3">
+                        <BookOpen className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">Data Science Fundamentals</h4>
+                        <p className="text-xs text-muted-foreground">Python, Statistics and Machine Learning</p>
+                      </div>
+                    </Link>
+                    
+                    <Link 
+                      to="/course/demo3" 
+                      className="flex items-center p-2 rounded-md hover:bg-accent"
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
+                      <div className="w-10 h-10 bg-primary/10 rounded-md flex items-center justify-center mr-3">
+                        <BookOpen className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">Mobile App Development</h4>
+                        <p className="text-xs text-muted-foreground">Build apps for iOS and Android</p>
+                      </div>
+                    </Link>
+                    
+                    <Link 
+                      to="/course/demo4" 
+                      className="flex items-center p-2 rounded-md hover:bg-accent"
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
+                      <div className="w-10 h-10 bg-primary/10 rounded-md flex items-center justify-center mr-3">
+                        <BookOpen className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">UI/UX Design Masterclass</h4>
+                        <p className="text-xs text-muted-foreground">Learn design principles and tools</p>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex gap-2">
